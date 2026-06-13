@@ -142,3 +142,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 fedex-docs/.DS_Store
+
+# macOS
+.DS_Store
