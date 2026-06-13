@@ -8,10 +8,14 @@ A publishable **n8n community node** (`n8n-nodes-fedex`) that talks **directly**
 REST API — no aggregator middleman. The value prop: businesses with their own negotiated FedEx
 accounts hit the carrier API with their own rates. npm has no direct FedEx node today.
 
-**Status:** greenfield. The repo is not yet scaffolded — only the docs exist. The full spec,
-decided scope, API map, and acceptance criteria live in **`fedex-node-build-brief.md`** (read it
-first). All doc links are centralized in **`documentation.yaml`** — consult it before
-web-searching for any FedEx or n8n reference.
+**Status:** scaffolded (declarative/custom template, `@n8n/node-cli` 0.34.0), `pnpm install`
+done, `pnpm build` + `pnpm lint` verified green-toolchain. The node still contains the
+**placeholder `User`/`Company` resources** — these must be replaced with the four real operations.
+The full spec, decided scope, API map, and acceptance criteria live in
+**`fedex-node-build-brief.md`** (read it first). All doc links are centralized in
+**`documentation.yaml`** — consult it before web-searching for any FedEx or n8n reference. The
+scaffold's own n8n build guidance lives in **`AGENTS.md`** + **`.agents/*.md`** (load the relevant
+`.agents/` file before editing nodes/credentials — see the table in `AGENTS.md`).
 
 **The FedEx docs are captured locally in `fedex-docs/` — do not web-search FedEx, read these.**
 The `.md` files are the portal prose; **`fedex-docs/json-schemas/*.json` are the OpenAPI specs and
@@ -67,19 +71,30 @@ the chosen `imageType` (`PDF`→`application/pdf`, `PNG`→`image/png`, `ZPLII`/
 JSON (tracking number, rates) through on the main output. Send `labelResponseOptions: LABEL` to get
 the base64 inline (vs `URL_ONLY`). The full confirmed enum lists are in `documentation.yaml`.
 
-**Auth = OAuth2 client_credentials, token cached ~1h.** The `FedexApi` credential holds `apiKey`
-(client_id), `secretKey` (client_secret), and an **environment dropdown** (sandbox/prod) that sets
-the base URL. Token exchange is `POST {baseURL}/oauth/token` (form-urlencoded). **Cache the token;
-never request one per call.** Implement a `credentialTest` so the "Test" button gives real feedback.
-On `401`, refresh the token once; treat `4xx` validation errors distinctly. Exact OAuth shape is
-confirmed in `documentation.yaml` under `fedex.auth`.
+**Auth — the scaffold uses n8n's built-in OAuth2.** The generated credential
+`FedexOAuth2Api` (`credentials/FedexOAuth2Api.credentials.ts`, credential name `fedexOAuth2Api`)
+**`extends ['oAuth2Api']` with `grantType: clientCredentials`**. This means n8n performs the
+token exchange and **caches/refreshes the ~1h token natively** — do NOT hand-roll token code.
+What still needs fixing before it works:
+- `scope` → set to **`CXS`** (currently the placeholder `users:read ...`; confirmed in `authorization.json`).
+- `accessTokenUrl` → currently hardcoded to `api.example.com`. Must become the FedEx token URL,
+  and must support **sandbox vs prod** (`apis-sandbox.fedex.com` vs `apis.fedex.com`). Decide how:
+  a user-set field on the credential, or two credential variants. This is the open auth design point.
+- Add the required **`icon`** property (lint error until then).
+- The node's `requestDefaults.baseURL` is likewise hardcoded to prod — tie it to the same env choice.
+
+`client_id`/`client_secret` map to the FedEx **API Key / Secret Key**. FedEx errors: surface
+`errors[].message`; treat `4xx` validation distinctly. Exact OAuth shape: `documentation.yaml` → `fedex.auth`.
 
 **Account number is sensitive and required for Rate + Ship.** Source it from the credential or a
 node field — never a default, never hardcoded. Same for API keys and base URLs.
 
-**File layout.** Keep files focused (<800 lines). Split operation definitions into **per-resource
-description files** (one per operation/resource) so Track/Rate/Ship/Validate stay independent and
-the pattern stays reusable for a likely future UPS package.
+**File layout (scaffolded).** Package lives at repo root; reference docs (`fedex-docs/`,
+`documentation.yaml`, `fedex-node-build-brief.md`) sit alongside but are excluded from the npm
+tarball (`package.json` `files: ["dist"]`). The node is `nodes/Fedex/Fedex.node.ts`; per-resource
+descriptions live in `nodes/Fedex/resources/<resource>/` (scaffold ships example `user/` +
+`company/` — replace with `track`, `rate`, `ship`, `address`). Keep files focused (<800 lines), one
+resource per folder, so operations stay independent and the pattern is reusable for a future UPS package.
 
 ## Hard constraints (these will fail the build / lint if violated)
 
