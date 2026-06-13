@@ -115,3 +115,8 @@ resource per folder, so operations stay independent and the pattern is reusable 
   prose → `fedex-docs/*.md`. Operation→file mapping is in `documentation.yaml`.
 - Live n8n SDK types (`INodeType`, `INodeTypeDescription`, `IExecuteFunctions`, `ICredentialType`)
   → prefer the n8n-mcp (MCP_DOCKER) or Context7 MCP tools over recalling from memory.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
