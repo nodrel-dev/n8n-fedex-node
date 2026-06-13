@@ -93,8 +93,11 @@ node field — never a default, never hardcoded. Same for API keys and base URLs
 `documentation.yaml`, `fedex-node-build-brief.md`) sit alongside but are excluded from the npm
 tarball (`package.json` `files: ["dist"]`). The node is `nodes/Fedex/Fedex.node.ts`; per-resource
 descriptions live in `nodes/Fedex/resources/<resource>/` (scaffold ships example `user/` +
-`company/` — replace with `track`, `rate`, `ship`, `address`). Keep files focused (<800 lines), one
-resource per folder, so operations stay independent and the pattern is reusable for a future UPS package.
+`company/` — replace with two noun-resources: `shipment/` holding the **Track**, **Get Rates**, and
+**Create** operations, and `address/` holding **Validate**). Resource = noun, operation = verb (n8n
+idiom). Keep files focused (<800 lines), one resource per folder, so operations stay independent and
+the pattern is reusable for a future UPS package. See `docs/adr/` for the rationale behind the
+resource model and the sandbox/production credential design.
 
 ## Hard constraints (these will fail the build / lint if violated)
 
