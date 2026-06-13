@@ -1,0 +1,171 @@
+# documentation.yaml
+#
+# Centralized index of all documentation needed to build n8n-nodes-fedex.
+# Purpose: avoid re-discovering doc URLs via web search every session.
+#
+# LOCAL DOCS ARE AUTHORITATIVE. The FedEx portal pages require login and drift
+# by version; we captured them. For request/response shapes, ALWAYS read the
+# local OpenAPI spec (fedex-docs/json-schemas/*.json) first — it is the source
+# of truth. The .md files are the prose/portal copy; the .json files are the
+# machine-readable schemas with exact field names, enums, and nesting.
+#
+# Conventions per entry:
+#   url            - canonical portal link (login-walled for FedEx catalog pages)
+#   local_md       - captured prose doc (repo-relative)
+#   local_schema   - captured OpenAPI spec = AUTHORITATIVE for shapes/enums
+#   auth_required  - true if the portal page is behind a login wall
+#
+# Last verified: 2026-06-13 against the captured OpenAPI specs:
+#   - Auth response shape: access_token / token_type / expires_in / scope all present.
+#   - Ship: encodedLabel confirmed in LabelResponseVO (alongside trackingNumber,
+#     contentType, docType, url). labelResponseOptions enum = [URL_ONLY, LABEL].
+#     imageType = [ZPLII, EPL2, PDF, PNG]. See ship enums block below.
+#   - All four v1 endpoint paths match the specs exactly.
+
+meta:
+  package_name: n8n-nodes-fedex
+  community_keyword: n8n-community-node-package
+  node_cli_binary: n8n-node          # from @n8n/node-cli, installed globally via pnpm
+  package_manager: pnpm              # ENFORCED - npm installs fail (only-allow postinstall)
+  local_docs_root: fedex-docs/       # captured FedEx docs (.md prose + json-schemas/*.json OpenAPI)
+
+# ---------------------------------------------------------------------------
+# FedEx REST API
+# ---------------------------------------------------------------------------
+fedex:
+  portal:
+    - name: Developer portal home
+      url: https://developer.fedex.com/api/en-us/home.html
+    - name: Get started / onboarding
+      url: https://developer.fedex.com/api/en-us/get-started.html
+    - name: API catalog (all APIs)
+      url: https://developer.fedex.com/api/en-us/catalog.html
+    - name: Best practices (captured)
+      local_md: fedex-docs/FedEx-Best Practices.md
+
+  base_urls:
+    sandbox: https://apis-sandbox.fedex.com
+    production: https://apis.fedex.com
+    # Credential exposes an environment dropdown that sets the base URL.
+
+  auth:
+    name: API Authorization (OAuth2 client_credentials)
+    url: https://developer.fedex.com/api/en-us/catalog/authorization/docs.html
+    local_md: fedex-docs/FedEx-API Authorization.md
+    local_schema: fedex-docs/json-schemas/authorization.json   # spec version 1.0
+    endpoint: POST /oauth/token
+    auth_required: true
+    # CONFIRMED against authorization.json:
+    #   Content-Type: application/x-www-form-urlencoded
+    #   body: grant_type=client_credentials&client_id=<API_KEY>&client_secret=<SECRET_KEY>
+    #   response: { access_token, token_type: "bearer", expires_in: 3600, scope: "CXS" }
+    #   Token TTL ~1h. Cache + refresh; never fetch per-request.
+    #   All calls send: Authorization: Bearer <access_token>
+
+  # --- v1 SCOPE: the four operations we are building ---
+  apis:
+    - name: Track API
+      operation: Track shipment
+      url: https://developer.fedex.com/api/en-us/catalog/track/v1/docs.html
+      local_md: fedex-docs/Basic Integrated Visibility.md   # FedEx's tracking product name
+      local_schema: fedex-docs/json-schemas/track.json      # spec version 1.0.0
+      endpoint: POST /track/v1/trackingnumbers
+      body_root: "{ trackingInfo: [{ trackingNumberInfo: { trackingNumber } }], includeDetailedScans }"
+      other_paths: [/track/v1/referencenumbers, /track/v1/trackingdocuments, /track/v1/notifications, /track/v1/associatedshipments, /track/v1/tcn]
+
+    - name: Rate & Transit Times API
+      operation: Get rates
+      url: https://developer.fedex.com/api/en-us/catalog/rate/v1/docs.html
+      local_md: fedex-docs/Rates and Transit Times API.md
+      local_schema: fedex-docs/json-schemas/rate.json       # spec version 1.0.0
+      endpoint: POST /rate/v1/rates/quotes
+      body_root: "{ accountNumber: { value }, requestedShipment: {...} }"
+
+    - name: Ship API
+      operation: Create shipment / label
+      url: https://developer.fedex.com/api/en-us/catalog/ship/v1/docs.html
+      local_md: fedex-docs/Ship API.md                      # thin prose; schema is authoritative
+      local_schema: fedex-docs/json-schemas/ship.json       # spec version 1.0.0 (448K)
+      endpoint: POST /ship/v1/shipments
+      body_root: "{ labelResponseOptions, requestedShipment: {...}, accountNumber: { value } }"
+      label_path: output.transactionShipments[].pieceResponses[].packageDocuments[].encodedLabel
+      label_leaf_schema: LabelResponseVO   # encodedLabel + trackingNumber + contentType + docType + url
+      other_paths: [/ship/v1/shipments/cancel, /ship/v1/shipments/results, /ship/v1/shipments/packages/validate, /ship/v1/shipments/tag]
+      enums:   # CONFIRMED from ship.json - use these exact values in node options
+        labelResponseOptions: [URL_ONLY, LABEL]   # LABEL = inline base64 in JSON (what we want)
+        imageType: [ZPLII, EPL2, PDF, PNG]
+        labelFormatType: [COMMON2D, LABEL_DATA_ONLY]
+        labelStockType: [PAPER_4X6, STOCK_4X675, PAPER_4X675, PAPER_4X8, PAPER_4X9, PAPER_7X475, PAPER_85X11_BOTTOM_HALF_LABEL, PAPER_85X11_TOP_HALF_LABEL, PAPER_LETTER, STOCK_4X675_LEADING_DOC_TAB, STOCK_4X8, STOCK_4X9_LEADING_DOC_TAB]
+      mime_map:   # encodedLabel imageType -> n8n binary MIME type + extension
+        PDF:   { mime: application/pdf, ext: pdf }
+        PNG:   { mime: image/png, ext: png }
+        ZPLII: { mime: application/octet-stream, ext: zpl }
+        EPL2:  { mime: application/octet-stream, ext: epl }
+
+    - name: Address Validation API
+      operation: Validate address
+      url: https://developer.fedex.com/api/en-us/catalog/address-validation/v1/docs.html
+      local_md: fedex-docs/Address Validation API.md
+      local_schema: fedex-docs/json-schemas/address-validation-service.json   # spec version 1.0.0
+      endpoint: POST /address/v1/addresses/resolve
+      body_root: "{ addressesToValidate: [{ address: {...} }] }"
+
+  # --- OUT OF v1 SCOPE: captured and available for future operations ---
+  available_not_in_scope:
+    - name: Pickup Request API
+      local_md: fedex-docs/Pickup Request API.md
+      local_schema: fedex-docs/json-schemas/pickup.json
+      paths: [/pickup/v1/pickups, /pickup/v1/pickups/availabilities, /pickup/v1/pickups/cancel]
+    - name: FedEx Location Search API
+      local_md: fedex-docs/FedEx Location Search API.md
+      local_schema: fedex-docs/json-schemas/locations.json
+      paths: [/location/v1/locations]
+    - name: Postal Code Validation API
+      local_md: fedex-docs/Postal Code Validation API.md
+      local_schema: fedex-docs/json-schemas/postal-code.json
+      paths: [/country/v1/postal/validate]
+    - name: Service Availability API
+      local_md: fedex-docs/Service Availability API.md
+      local_schema: fedex-docs/json-schemas/service-availability.json
+      paths: [/availability/v1/transittimes, /availability/v1/packageandserviceoptions, /availability/v1/specialserviceoptions]
+
+  error_shape: '{ "errors": [{ "code": "...", "message": "..." }], "transactionId": "..." }'
+  # Surface errors[].message in NodeApiError. Handle 401 (refresh once) distinctly from 4xx.
+  # Every API spec defines 400/401/403/404/500/503 responses.
+
+# ---------------------------------------------------------------------------
+# n8n node development
+# ---------------------------------------------------------------------------
+n8n:
+  guides:
+    - name: Community nodes hub
+      url: https://docs.n8n.io/integrations/community-nodes/
+    - name: Build a declarative-style node (tutorial)
+      url: https://docs.n8n.io/integrations/creating-nodes/build/declarative-style-node/
+      purpose: Primary pattern for Track / Rate / Validate
+    - name: Build a programmatic-style node
+      url: https://docs.n8n.io/integrations/creating-nodes/build/programmatic-style-node/
+      purpose: Pattern for Create shipment (base64 label -> binary in execute())
+
+  reference:
+    - name: Node base files / structure
+      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/node-base-files/
+    - name: Credentials file reference
+      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/credentials-files/
+      purpose: ICredentialType, authenticate, preAuthentication, credentialTest
+    - name: HTTP request helpers / routing
+      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/http-request-helpers/
+    - name: Code standards (incl. binary data handling)
+      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/code-standards/
+
+  publishing:
+    - name: Submit community nodes (registry + verification)
+      url: https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/
+    - name: "@n8n/node-cli (npm)"
+      url: https://www.npmjs.com/package/@n8n/node-cli
+      note: npmjs blocks automated fetch (403); browse manually if needed.
+
+  # SDK type signatures: prefer pulling current types via MCP tools over memory:
+  #   - n8n-mcp tools (MCP_DOCKER): get_node_info, get_node_documentation, get_node_essentials
+  #   - Context7 MCP: resolve-library-id "n8n" then get-library-docs
+  # Types you'll touch: INodeType, INodeTypeDescription, IExecuteFunctions, ICredentialType
