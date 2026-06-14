@@ -14,7 +14,7 @@ export class FedexOAuth2Api implements ICredentialType {
 
 	displayName = 'FedEx OAuth2 API';
 
-	documentationUrl = 'https://github.com/noctisreus/n8n-fedex-node#credentials';
+	documentationUrl = 'https://github.com/nodrel-dev/n8n-fedex-node#credentials';
 
 	icon: Icon = { light: 'file:fedex.svg', dark: 'file:fedex.dark.svg' };
 

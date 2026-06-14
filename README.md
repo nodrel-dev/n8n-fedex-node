@@ -75,7 +75,7 @@ Sandbox label creation works immediately. **Production** is different: before Fe
 
 ## Security & dependencies
 
-The published package ships only `dist/` with **zero runtime dependencies** (`n8n-workflow` is a peer, provided by your n8n instance). Any `pnpm audit` / Dependabot findings are confined to the build, test, and release tooling or the host-provided peer — none of them reach an installed node. Outstanding upstream advisories (waiting on newer `@n8n/node-cli` and `n8n-workflow` releases) are tracked in [#2](https://github.com/noctisreus/n8n-fedex-node/issues/2).
+The published package ships only `dist/` with **zero runtime dependencies** (`n8n-workflow` is a peer, provided by your n8n instance). Any `pnpm audit` / Dependabot findings are confined to the build, test, and release tooling or the host-provided peer — none of them reach an installed node. Outstanding upstream advisories (waiting on newer `@n8n/node-cli` and `n8n-workflow` releases) are tracked in [#2](https://github.com/nodrel-dev/n8n-fedex-node/issues/2).
 
 ## Usage
 
