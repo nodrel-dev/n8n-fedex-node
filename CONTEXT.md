@@ -70,7 +70,22 @@ _Avoid_: mode, stage, test/prod (as a schema name)
 ## Sandbox verification (2026-06-14)
 
 All four operations confirmed against `apis-sandbox.fedex.com` with the node's exact request
-shapes: OAuth `client_credentials` token (scope `CXS`) ✓, Track ✓, Validate ✓ (one transient
-FedEx 500 then 200), Get Rates ✓ (negotiated ACCOUNT rate + transit times), Create ✓
+shapes: OAuth `client_credentials` token (**no explicit scope** — FedEx returns `CXS-TP`) ✓,
+Track ✓, Validate ✓ (one transient FedEx 500 then 200), Get Rates ✓ (negotiated ACCOUNT rate +
+transit times), Create ✓
 (`output.transactionShipments[].pieceResponses[].packageDocuments[].encodedLabel` present with a
 master tracking number — the path `extractLabel` reads).
+
+## Re-test through running n8n (2026-06-14)
+
+Ran all four operations through the live `n8n-node dev` instance (not just the direct verify
+script). This caught a real bug: the credential sent `scope: CXS`, which FedEx's token endpoint
+rejects with HTTP 400 — the prior "confirmed" run had used a no-scope direct script, so the
+through-n8n token exchange was never actually exercised. Fixed `scope` default to empty.
+
+Entitlement note: sandbox keys are **per-project** — the Track key (`CXS-TP`) returns 403 on
+Validate/Rate/Ship, and the Ship key returns 403 on Track. A workspace that uses all four
+operations needs **separate credentials per operation group** (the node already supports
+per-node credential selection). Verified: Track ✓ (track key), Validate ✓ / Get Rates ✓ (7
+services) / Create ✓ (valid 7.4 kB PDF label binary, filename sanitized, no `encodedLabel` leak)
+all on the ship key.

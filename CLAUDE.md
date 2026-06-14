@@ -76,7 +76,11 @@ the base64 inline (vs `URL_ONLY`). The full confirmed enum lists are in `documen
 **`extends ['oAuth2Api']` with `grantType: clientCredentials`**. This means n8n performs the
 token exchange and **caches/refreshes the ~1h token natively** — do NOT hand-roll token code.
 What still needs fixing before it works:
-- `scope` → set to **`CXS`** (currently the placeholder `users:read ...`; confirmed in `authorization.json`).
+- `scope` → must be **empty**. FedEx's `client_credentials` flow derives the scope from the
+  client's registration and **rejects an explicit `scope` param** (`BAD.REQUEST.ERROR: No
+  registered scope value for this client has been requested`, HTTP 400). Sending `CXS` (despite
+  what `authorization.json` implies) breaks token exchange; verified against sandbox 2026-06-14.
+  FedEx returns the effective scope (e.g. `CXS-TP`) on a successful token response.
 - `accessTokenUrl` → currently hardcoded to `api.example.com`. Must become the FedEx token URL,
   and must support **sandbox vs prod** (`apis-sandbox.fedex.com` vs `apis.fedex.com`). Decide how:
   a user-set field on the credential, or two credential variants. This is the open auth design point.
