@@ -48,7 +48,10 @@ export class FedexOAuth2Api implements ICredentialType {
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'hidden',
-			default: 'CXS',
+			// Must be empty. FedEx's client_credentials flow derives scope from the client's
+			// registration and rejects an explicit scope param ("No registered scope value for
+			// this client has been requested", HTTP 400). Sending CXS here breaks token exchange.
+			default: '',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
