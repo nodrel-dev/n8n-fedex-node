@@ -15,6 +15,9 @@ export class Fedex implements INodeType {
 		defaults: {
 			name: 'FedEx',
 		},
+		// Exposed as an AI agent tool. The Create operation buys a real shipment and bills the
+		// configured account, so gate it behind human approval in agentic workflows; the
+		// credential defaults to sandbox to keep an unattended agent off a live account.
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],

@@ -17,6 +17,20 @@ export const LABEL_MIME: Record<string, LabelMime> = {
 	EPL2: { mime: 'application/octet-stream', ext: 'epl' },
 };
 
+// Upper bound on a decoded label. A real FedEx label is a few hundred KB at most; this is a
+// defensive guard so a malformed/oversized base64 blob can't pressure memory unchecked.
+export const MAX_LABEL_BYTES = 20 * 1024 * 1024;
+
+/**
+ * The tracking number comes from FedEx's response but is interpolated into a binary fileName,
+ * so strip anything that isn't a safe filename character (defence-in-depth against path or
+ * header tricks in whatever consumes the binary downstream).
+ */
+function safeFileNamePart(value: string): string {
+	const cleaned = value.replace(/[^\w.-]/g, '_');
+	return cleaned.length > 0 ? cleaned : 'unknown';
+}
+
 interface LabelDocument {
 	encodedLabel?: string;
 }
@@ -72,9 +86,16 @@ export function extractLabel(response: unknown, imageType: string): ExtractedLab
 	const trackingNumber = piece?.trackingNumber ?? 'unknown';
 	const mime = LABEL_MIME[imageType] ?? LABEL_MIME.PDF;
 
+	const buffer = Buffer.from(encodedLabel, 'base64');
+	if (buffer.length > MAX_LABEL_BYTES) {
+		throw new Error(
+			`FedEx returned an unexpectedly large label (${buffer.length} bytes, limit ${MAX_LABEL_BYTES}).`,
+		);
+	}
+
 	return {
-		buffer: Buffer.from(encodedLabel, 'base64'),
-		fileName: `label-${trackingNumber}.${mime.ext}`,
+		buffer,
+		fileName: `label-${safeFileNamePart(trackingNumber)}.${mime.ext}`,
 		mimeType: mime.mime,
 		trackingNumber,
 		json: stripEncodedLabels(output) as JsonObject,

@@ -53,3 +53,24 @@ prose; "account number" is fine when naming the literal field)
 Which FedEx host a request targets — **sandbox** (test) or **production** (live). A single
 user-facing choice that governs both the OAuth token URL and the API base URL together.
 _Avoid_: mode, stage, test/prod (as a schema name)
+
+## External constraints (FedEx portal, not our code)
+
+- **Two projects / two credentials.** The FedEx Developer Portal provisions the **Track API**
+  separately from the shipping APIs (Rate, Ship, Address Validation); one project usually can't
+  hold all four, and each project issues its own App Credentials. n8n supports multiple
+  credentials of one type, so the user makes two `fedexOAuth2Api` credentials and selects the
+  right one per node — Track on Track nodes, the shipping credential on Get Rates / Create /
+  Validate. No code impact; documented in the README.
+- **Ship label certification (production only).** Before FedEx authorizes *production* credentials
+  to transmit live label transactions, the **Create** operation's sample labels must pass the
+  FedEx Bar Code Analysis group review (~3 business-day turnaround, approval is per project).
+  Sandbox label creation works immediately. Track / Get Rates / Validate are exempt.
+
+## Sandbox verification (2026-06-14)
+
+All four operations confirmed against `apis-sandbox.fedex.com` with the node's exact request
+shapes: OAuth `client_credentials` token (scope `CXS`) ✓, Track ✓, Validate ✓ (one transient
+FedEx 500 then 200), Get Rates ✓ (negotiated ACCOUNT rate + transit times), Create ✓
+(`output.transactionShipments[].pieceResponses[].packageDocuments[].encodedLabel` present with a
+master tracking number — the path `extractLabel` reads).
