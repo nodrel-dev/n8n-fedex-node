@@ -21,6 +21,25 @@ rates, and Create shipment/label, authenticated with the user's own FedEx accoun
   address remain usable for any address.
 - Q: What price(s) should Get rates surface? → A: Both the account's negotiated rate and FedEx's
   standard list rate per service, when FedEx returns both, so users see their discount.
+- Q: For v1 Create shipment, who pays the freight (billing model)? → A: Hardcode
+  `paymentType: SENDER` — the shipment always bills the configured Shipping Account; no payment UI
+  and no payor block. RECIPIENT / THIRD_PARTY (and their required payor.responsibleParty surface)
+  and COLLECT are deferred to v2.
+- Q: For Track, what input cardinality should v1 support? → A: Both — a single tracking-number
+  field plus an optional "multiple" mode that accepts a list and batches it into one FedEx call.
+  Per-item failures are still reported individually under Continue-On-Fail.
+- Q: For Track, how much scan detail should be returned? → A: Detailed scan history by default,
+  with a toggle to opt out for a lighter status-only response.
+- Q: For Get Rates and Create shipment, are package dimensions required? → A: Package weight is
+  required; dimensions are optional for both operations (FedEx rates/ships on weight alone;
+  dimensions refine dimensional-weight pricing when supplied).
+- Q: What measurement units should weight and dimensions use? → A: Expose a weight-unit selector
+  (default LB, KG option) and a dimension-unit selector (default IN, CM option), rather than
+  hardcoding US units.
+- Q: What shape should the Get Rates output take? → A: A flattened result with one item per
+  available service, each carrying the service, its Negotiated Rate, and its List Rate (when FedEx
+  returns it) plus currency — not FedEx's raw nested `rateReplyDetails` / `rateType` array, so the
+  discount is readable without the caller walking FedEx's taxonomy.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -49,6 +68,9 @@ A bad/expired connection or unknown tracking number returns a clear, actionable 
    operation runs, **Then** the operator is told the connection is the problem and how to fix it.
 4. **Given** the operator has chosen the test/sandbox environment, **When** Track runs, **Then** the
    request goes to FedEx's sandbox and not to the live production account.
+5. **Given** the operator enables the multiple-tracking-number mode and supplies a list, **When**
+   Track runs, **Then** the workflow receives a status result for each number, and any individually
+   unresolvable number is flagged without failing the rest.
 
 ---
 
@@ -153,18 +175,27 @@ chosen format (openable/printable) together with the tracking number — not an 
 - **FR-004**: The node MUST keep the authorization session alive across requests and renew it
   automatically when it expires, without requiring the user to re-enter credentials per request.
 - **FR-005**: The node MUST provide a **Track shipment** operation that returns a shipment's status
-  and tracking detail given a tracking number.
+  and tracking detail given a tracking number. The operation MUST accept a single tracking number
+  and MUST also offer an optional mode that accepts a list of tracking numbers resolved in one
+  request; either way, a result that cannot be resolved is reported per tracking number without
+  failing the others. Track MUST return detailed scan history by default, and MUST expose a toggle
+  to opt out of scan detail for a lighter status-only response.
 - **FR-006**: The node MUST provide a **Validate address** operation that returns a standardized
   address and a residential/commercial classification, or a clear unresolved indication.
 - **FR-007**: The node MUST provide a **Get rates** operation that returns available service options
   with their prices for supplied shipment details and account number. Each service option MUST
   surface the account's **negotiated rate** and, when FedEx also returns it, the standard **list
-  rate**, so the user can see their discount. v1 covers **domestic shipments**; international rating
-  (with customs/commodity data) is out of scope for v1.
+  rate**, so the user can see their discount. The operation MUST emit a **flattened** result — one
+  item per available service, each carrying the service, its negotiated rate, its list rate (when
+  returned), and currency — rather than passing through FedEx's raw nested rate structure. v1 covers
+  **domestic shipments**; international rating (with customs/commodity data) is out of scope for v1.
 - **FR-008**: The node MUST provide a **Create shipment** operation that returns the assigned
   tracking number and a shipping label. v1 supports a **single package per shipment** (one label,
   one tracking number) for **domestic shipments**; multi-package and international shipments (which
   require customs/commodity data) are out of scope for v1.
+- **FR-008a**: For Create shipment, v1 MUST bill the shipment to the sender's configured Shipping
+  Account (`paymentType: SENDER`) with no payment/payor user input. Billing the recipient or a third
+  party (which requires a separate payor identity) is out of scope for v1.
 - **FR-009**: For Create shipment, the user MUST be able to select the label format (at minimum PDF,
   PNG, and a thermal/ZPL option), and the label MUST be delivered as a downloadable file attachment
   in that format — never as an encoded text string embedded in the data output.
@@ -178,6 +209,12 @@ chosen format (openable/printable) together with the tracking number — not an 
   failures without aborting the entire run when that setting is enabled.
 - **FR-014**: The node MUST validate user-supplied input at its boundary and fail fast with a clear
   message when required fields are missing or malformed, before contacting FedEx.
+- **FR-014a**: For Get Rates and Create shipment, package **weight** MUST be required and package
+  **dimensions** MUST be optional; when dimensions are supplied they are passed through to refine
+  dimensional-weight pricing, and when omitted the request still proceeds on weight alone.
+- **FR-014b**: The node MUST let the user select the weight unit (default **LB**, with **KG**) and
+  the dimension unit (default **IN**, with **CM**) for Get Rates and Create shipment, and MUST send
+  the selected units to FedEx rather than assuming fixed units.
 - **FR-015**: The package MUST be installable from the public community registry as a community node
   and include the documentation a user needs to obtain FedEx credentials and use each operation.
 

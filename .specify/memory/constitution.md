@@ -1,9 +1,13 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: (template / unversioned) → 1.0.0
-Bump rationale: Initial ratification — placeholders replaced with concrete,
-  project-specific principles derived from fedex-node-build-brief.md + CLAUDE.md.
+Version change: 1.0.0 → 1.1.0
+Bump rationale: MINOR — a narrow unit-test runner (vitest) is brought into scope for
+  the node's pure assembly/extraction cores (toFedexAddress, toFedexContact,
+  extractLabel, shapeRates), amending the prior "no unit test runner in scope" gate.
+  Sandbox manual verification of operations is unchanged. See docs/adr/0003.
+  (1.0.0 initial ratification: placeholders replaced with concrete principles
+  derived from fedex-node-build-brief.md + CLAUDE.md.)
 
 Principles defined (all new):
   I.   Direct Carrier Integration — No Middleman
@@ -113,9 +117,15 @@ account permission). Hiding the real FedEx message makes the node undebuggable i
 
 - **Build order is fixed and incremental** (simplest first, each verified before the next):
   (1) Track → (2) Validate address → (3) Get rates → (4) Create shipment / label.
-- **Verification is manual** via `n8n-node dev` against the FedEx **sandbox** — there is no unit
-  test runner in scope. Each operation MUST be exercised end-to-end against sandbox tracking
-  numbers / test account numbers before it is considered done.
+- **Operations are verified manually** via `n8n-node dev` against the FedEx **sandbox**: each
+  operation MUST be exercised end-to-end against sandbox tracking numbers / test account numbers
+  before it is considered done.
+- **Pure cores are additionally unit-tested.** The programmatic assembly/extraction functions
+  (e.g. `toFedexAddress`, `toFedexContact`, `extractLabel`, `shapeRates`) MUST be pure
+  (plain-in / plain-out, no `IExecuteFunctions` coupling) and MUST carry **vitest** unit tests over
+  their interface, asserted against captured `fedex-docs/json-schemas` fixtures. The runner is
+  **scoped to these pure cores only** — it does not test the declarative routing and does not
+  replace sandbox verification of the operations. See docs/adr/0003.
 - **Green-toolchain gate before release:** `n8n-node lint --strict` passes and `n8n-node build`
   succeeds. No `release` while either is red.
 - **Definition of done** (per build brief): all four operations verified against sandbox;
@@ -144,4 +154,4 @@ against these principles. Schema-verification (Principle II) and secrets-from-cr
 development guidance lives in `CLAUDE.md` and `AGENTS.md` + `.agents/*.md`; consult them
 alongside this constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-13 | **Last Amended**: 2026-06-13
+**Version**: 1.1.0 | **Ratified**: 2026-06-13 | **Last Amended**: 2026-06-14
