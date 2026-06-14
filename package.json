@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "description": "n8n community node for the FedEx REST API — track shipments, get rates, create shipping labels, and validate addresses directly against your own FedEx account.",
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/noctisreus/n8n-fedex-node#readme",
   "keywords": ["n8n-community-node-package"],
   "author": { "name": "Kyle Tully", "email": "kytully@gmail.com" },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "git+https://github.com/noctisreus/n8n-fedex-node.git"
   },
   "scripts": {
     "build": "n8n-node build",
@@ -16,6 +16,8 @@
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
@@ -28,10 +30,12 @@
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
+    "@types/node": "^18.19.0",
     "eslint": "9.32.0",
     "prettier": "3.6.2",
     "release-it": "^19.0.4",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": { "n8n-workflow": "*" }
 }
