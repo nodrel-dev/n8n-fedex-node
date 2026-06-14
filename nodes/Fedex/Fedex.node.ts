@@ -1,25 +1,29 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
-import { userDescription } from './resources/user';
-import { companyDescription } from './resources/company';
+import { shipmentDescription } from './resources/shipment';
+import { addressDescription } from './resources/address';
 
 export class Fedex implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Fedex',
+		displayName: 'FedEx',
 		name: 'fedex',
 		icon: { light: 'file:fedex.svg', dark: 'file:fedex.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Interact with the Fedex API',
+		description:
+			'Track shipments, validate addresses, get rates, and create labels with your own FedEx account',
 		defaults: {
-			name: 'Fedex',
+			name: 'FedEx',
 		},
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [{ name: 'fedexOAuth2Api', required: true }],
 		requestDefaults: {
-			baseURL: 'https://apis.fedex.com',
+			// Base URL follows the credential's Environment so token exchange and API calls
+			// always target the same FedEx host (ADR-0001).
+			baseURL:
+				'={{ $credentials.environment === "production" ? "https://apis.fedex.com" : "https://apis-sandbox.fedex.com" }}',
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -32,19 +36,13 @@ export class Fedex implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{
-						name: 'User',
-						value: 'user',
-					},
-					{
-						name: 'Company',
-						value: 'company',
-					},
+					{ name: 'Address', value: 'address' },
+					{ name: 'Shipment', value: 'shipment' },
 				],
-				default: 'user',
+				default: 'shipment',
 			},
-			...userDescription,
-			...companyDescription,
+			...shipmentDescription,
+			...addressDescription,
 		],
 	};
 }
