@@ -73,6 +73,10 @@ Sandbox label creation works immediately. **Production** is different: before Fe
 - Built and tested against the FedEx REST API (Track v1, Address v1, Rate v1, Ship v1).
 - The shipping **account number** is never defaulted or hardcoded — it always comes from the node field, and your API keys live only in the credential.
 
+## Security & dependencies
+
+The published package ships only `dist/` with **zero runtime dependencies** (`n8n-workflow` is a peer, provided by your n8n instance). Any `pnpm audit` / Dependabot findings are confined to the build, test, and release tooling or the host-provided peer — none of them reach an installed node. Outstanding upstream advisories (waiting on newer `@n8n/node-cli` and `n8n-workflow` releases) are tracked in [#2](https://github.com/noctisreus/n8n-fedex-node/issues/2).
+
 ## Usage
 
 ### Get Rates and Create
