@@ -145,3 +145,13 @@ fedex-docs/.DS_Store
 
 # macOS
 .DS_Store
+
+# Internal planning/reference — kept local, never published
+/specs/
+/.specify/
+/.claude/
+/.agents/
+/fedex-docs/
+/AGENTS.md
+/fedex-node-build-brief.md
+/documentation.yaml
