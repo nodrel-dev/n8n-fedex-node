@@ -13,13 +13,13 @@ done, `pnpm build` + `pnpm lint` verified green-toolchain. The node still contai
 **placeholder `User`/`Company` resources** — these must be replaced with the four real operations.
 The full spec, decided scope, API map, and acceptance criteria live in
 **`internal/fedex-node-build-brief.md`** (read it first). All doc links are centralized in
-**`internal/documentation.yaml`** — consult it before web-searching for any FedEx or n8n reference. The
-scaffold's own n8n build guidance lives in **`internal/AGENTS.md`** + **`internal/.agents/*.md`** (load the relevant
-`internal/.agents/` file before editing nodes/credentials — see the table in `internal/AGENTS.md`).
+**`documentation.yaml`** — consult it before web-searching for any FedEx or n8n reference. The
+scaffold's own n8n build guidance lives in **`AGENTS.md`** + **`.agents/*.md`** (load the relevant
+`.agents/` file before editing nodes/credentials — see the table in `AGENTS.md`).
 
 **The FedEx docs are captured locally in `internal/fedex-docs/` — do not web-search FedEx, read these.**
 The `.md` files are the portal prose; **`internal/fedex-docs/json-schemas/*.json` are the OpenAPI specs and
-are AUTHORITATIVE** for request/response field names, enums, and nesting. `internal/documentation.yaml`
+are AUTHORITATIVE** for request/response field names, enums, and nesting. `documentation.yaml`
 maps each operation to its `local_md` + `local_schema` and lists the confirmed Ship label enums
 and a MIME map. The portal pages require login, so the captured specs are the working source.
 
@@ -69,7 +69,7 @@ against `ship.json` — the leaf is `LabelResponseVO`, which also carries `track
 the chosen `imageType` (`PDF`→`application/pdf`, `PNG`→`image/png`, `ZPLII`/`EPL2`→
 `application/octet-stream`) and a sensible filename (e.g. `label-<trackingNumber>.pdf`). Pass the
 JSON (tracking number, rates) through on the main output. Send `labelResponseOptions: LABEL` to get
-the base64 inline (vs `URL_ONLY`). The full confirmed enum lists are in `internal/documentation.yaml`.
+the base64 inline (vs `URL_ONLY`). The full confirmed enum lists are in `documentation.yaml`.
 
 **Auth — the scaffold uses n8n's built-in OAuth2.** The generated credential
 `FedexOAuth2Api` (`credentials/FedexOAuth2Api.credentials.ts`, credential name `fedexOAuth2Api`)
@@ -88,18 +88,18 @@ What still needs fixing before it works:
 - The node's `requestDefaults.baseURL` is likewise hardcoded to prod — tie it to the same env choice.
 
 `client_id`/`client_secret` map to the FedEx **API Key / Secret Key**. FedEx errors: surface
-`errors[].message`; treat `4xx` validation distinctly. Exact OAuth shape: `internal/documentation.yaml` → `fedex.auth`.
+`errors[].message`; treat `4xx` validation distinctly. Exact OAuth shape: `documentation.yaml` → `fedex.auth`.
 
 **Account number is sensitive and required for Rate + Ship.** Source it from the credential or a
 node field — never a default, never hardcoded. Same for API keys and base URLs.
 
-**File layout (scaffolded).** Package lives at repo root. All internal reference docs, specs, and
-planning live under **`internal/`**, which is gitignored by this public repo and is **its own
-private git repo** (`nodrel-dev/n8n-fedex-node-internal`). On a fresh clone, restore it with
-`./bootstrap-internal.sh`; commit doc changes from inside `internal/`, code changes from the root.
-The reference docs (`internal/fedex-docs/`, `internal/documentation.yaml`,
-`internal/fedex-node-build-brief.md`) are also excluded from the npm tarball (`package.json`
-`files: ["dist"]`). The node is `nodes/Fedex/Fedex.node.ts`; per-resource
+**File layout.** Package lives at repo root. Most docs are **public, in this repo** (they never ship
+to npm — `files: ["dist"]` — but version alongside the code): `docs/adr/`, `CONTEXT.md`,
+`documentation.yaml`, `AGENTS.md` + `.agents/`, `specs/`. Only two things stay **private** under
+**`internal/`** (its own private repo `nodrel-dev/n8n-fedex-node-internal`, gitignored here, restored
+on a fresh clone via `./bootstrap-internal.sh`): `internal/fedex-docs/` (FedEx's copyrighted captured
+specs) and `internal/fedex-node-build-brief.md` (commercial strategy). Never commit secrets to
+either repo. The node is `nodes/Fedex/Fedex.node.ts`; per-resource
 descriptions live in `nodes/Fedex/resources/<resource>/`. The two resources **mirror the two FedEx
 dev-portal projects / credentials** (ADR-0004): `tracking/` holding **Track** (binds
 `fedexTrackOAuth2Api`), and `shipping/` holding **Get Rates**, **Create**, and **Validate** (binds
@@ -107,15 +107,15 @@ dev-portal projects / credentials** (ADR-0004): `tracking/` holding **Track** (b
 key). Resource = FedEx project, operation = verb; credentials bind per operation (operation values
 are globally unique). Keep files focused (<800 lines), one resource per folder, so operations stay
 independent and the pattern is reusable for a future UPS package. The rationale behind the resource
-model and the sandbox/production credential design is captured in the local `internal/docs/adr/` notes (kept
-out of the published repo, like `internal/fedex-docs/` and `internal/documentation.yaml`).
+model and the sandbox/production credential design is captured in the public `docs/adr/` notes; the
+captured FedEx specs they reference live in the private `internal/fedex-docs/`.
 
 ## Hard constraints (these will fail the build / lint if violated)
 
 - **pnpm only.** npm breaks the install.
 - **Do not modify the eslint config** — `n8n-node lint --strict` fails if it differs from default.
 - **Verify FedEx field names / paths against live docs** before coding each operation — versions
-  drift. `internal/documentation.yaml` flags which entries need re-verification (`verify: true`).
+  drift. `documentation.yaml` flags which entries need re-verification (`verify: true`).
 - Surface the real FedEx error (`errors[].message`) via `NodeApiError` / `NodeOperationError`;
   honor n8n's **Continue On Fail**.
 - Package must be named `n8n-nodes-fedex`, include the `n8n-community-node-package` keyword, and
@@ -124,9 +124,9 @@ out of the published repo, like `internal/fedex-docs/` and `internal/documentati
 ## Reference shortcuts
 
 - Full spec & acceptance criteria → `internal/fedex-node-build-brief.md`
-- All doc URLs, local doc map, confirmed endpoints/enums, OAuth shape → `internal/documentation.yaml`
+- All doc URLs, local doc map, confirmed endpoints/enums, OAuth shape → `documentation.yaml`
 - FedEx request/response shapes → `internal/fedex-docs/json-schemas/*.json` (OpenAPI, authoritative);
-  prose → `internal/fedex-docs/*.md`. Operation→file mapping is in `internal/documentation.yaml`.
+  prose → `internal/fedex-docs/*.md`. Operation→file mapping is in `documentation.yaml`.
 - Live n8n SDK types (`INodeType`, `INodeTypeDescription`, `IExecuteFunctions`, `ICredentialType`)
   → prefer the n8n-mcp (MCP_DOCKER) or Context7 MCP tools over recalling from memory.
 
