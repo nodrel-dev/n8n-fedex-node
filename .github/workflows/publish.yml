@@ -1,74 +1,64 @@
-# Publishes this n8n community node package to npm on every version tag push.
+# Release automation for this n8n community node.
 #
-# Starting May 1 2026, n8n requires all community nodes to be published via
-# GitHub Actions with npm provenance statements. This workflow satisfies that
-# requirement. Provenance lets anyone cryptographically verify that a package
-# was built by this exact workflow, from this exact repository and commit.
+# release-please drives semantic versioning from Conventional Commit messages
+# (feat / fix / feat!: …): on every push to main it maintains a "release PR" that
+# bumps the version in package.json and updates CHANGELOG.md. Merging that PR makes
+# release-please create the git tag and GitHub Release, and the publish job below
+# then ships to npm — all in this one workflow run.
 #
-# ─── PREREQUISITES ─────────────────────────────────────────────────────────────
+# ─── WHY THIS FILE IS STILL CALLED publish.yml ─────────────────────────────────
+# npm OIDC Trusted Publishing is configured against this exact workflow FILENAME
+# (@nodrel-dev/n8n-nodes-fedex → Settings → Trusted Publisher → publish.yml). The
+# publish job must live here for OIDC to authenticate, so the filename is kept even
+# though the workflow now also runs release-please. No NPM_TOKEN secret is used.
 #
-# @n8n/node-cli ≥ 0.23.0 is required. Earlier versions do not support the
-# provenance flag passed by `npm run release` in CI, and the publish step will
-# fail. Check the version installed in this project with:
-#
-#   npm list @n8n/node-cli
-#
-# To upgrade, add @n8n/node-cli@latest as a dev dependency using your package manager.
-#
-# ─── ONE-TIME SETUP ────────────────────────────────────────────────────────────
-#
-# This workflow authenticates to npm via OIDC Trusted Publishing — no long-lived
-# NPM_TOKEN secret. Configure the trusted publisher once on npmjs.com:
-#   1. Log in to npmjs.com and open this package's settings:
-#        @nodrel-dev/n8n-nodes-fedex → Settings → Trusted Publisher
-#   2. Click "Add a publisher" / "GitHub Actions" and fill in:
-#        Organization or user: nodrel-dev
-#        Repository:           n8n-fedex-node
-#        Workflow filename:    publish.yml
-#        Environment:          (leave blank unless you use GitHub Environments)
-#   3. Save. No secret ever touches the repo — GitHub's OIDC token is used.
-#
-# Provenance is signed automatically by GitHub's OIDC infrastructure.
-#
-# ─── TAG CONVENTION ────────────────────────────────────────────────────────────
-#
-# This workflow triggers on tags matching "*.*.*" (e.g. 0.2.0).
-# If you prefer tags with a "v" prefix (e.g. v0.2.0), change the filter to:
-#   tags: ['v*.*.*']
-#
-# ─── RELEASE PROCESS ───────────────────────────────────────────────────────────
-#
-# Run the following command locally to start an interactive release:
-#
-#   npm run release
-#
-# This will lint, build, prompt for a version bump, update the changelog,
-# commit, tag, and push — which triggers this workflow to publish to npm.
+# ─── VERSIONING ────────────────────────────────────────────────────────────────
+# Pre-1.0 (configured in release-please-config.json):
+#   fix:      → patch   (0.1.3 → 0.1.4)
+#   feat:     → patch   (bump-patch-for-minor-pre-major)
+#   feat!: / BREAKING CHANGE → minor (0.1.3 → 0.2.0)
+# Manual bumping is no longer needed — let the commit messages drive it.
 
-name: Publish
+name: Release
 
 on:
   push:
-    tags:
-      # Matches 0.1.0, 1.2.3, 2.0.0-rc.1, etc.
-      # See "TAG CONVENTION" above if you prefer tags with a "v" prefix.
-      - '*.*.*'
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
+  release-please:
+    name: Release PR / tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   publish:
     name: Publish to npm
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
 
     permissions:
-      # Required to mint an OIDC token for npm provenance attestation.
+      # Mint an OIDC token for npm provenance + Trusted Publishing.
       id-token: write
-      # Scoped down from the default (write) for least-privilege publishing.
       contents: read
 
     steps:
       - uses: actions/checkout@v6
 
-      # This package is pnpm-only (no package-lock.json), so install with pnpm.
+      # pnpm-only project (no package-lock.json).
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
@@ -88,40 +78,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Release
-        # Publishes to npm via OIDC Trusted Publishing — no NPM_TOKEN secret needed.
-        # npm authenticates using the workflow's OIDC identity (requires id-token:
-        # write above and npm >= 11.5.1, installed above). Provenance is signed
-        # automatically. Lint and build run as part of the release process.
-        #
-        # PREREQUISITE: the trusted publisher must be configured once on npmjs.com
-        # for @nodrel-dev/n8n-nodes-fedex →
-        #   Settings → Trusted Publisher → GitHub Actions
-        #     Organization or user: nodrel-dev
-        #     Repository:           n8n-fedex-node
-        #     Workflow filename:    publish.yml
-        #     Environment:          (leave blank)
-        run: pnpm run release
+      - name: Build
+        run: pnpm build
 
-  # Creates the GitHub Release for the tag after npm publish succeeds. Kept in a
-  # separate job so the publish job above stays least-privilege (contents: read).
-  github-release:
-    name: GitHub Release
-    needs: publish
-    runs-on: ubuntu-latest
-
-    permissions:
-      # Required to create the release.
-      contents: write
-
-    steps:
-      - name: Create GitHub Release from tag
-        # Auto-generates notes from the commits/PRs since the previous release.
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
-            --generate-notes \
-            --verify-tag
+      # Authenticates via the workflow's OIDC identity (Trusted Publishing) and
+      # signs provenance automatically — no NPM_TOKEN. Publishes the version that
+      # release-please already bumped in package.json.
+      - name: Publish to npm
+        run: npm publish --provenance --access public
