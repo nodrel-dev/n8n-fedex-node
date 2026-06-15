@@ -119,8 +119,12 @@ descriptions live in `nodes/Fedex/resources/<resource>/`. The two resources **mi
 dev-portal projects / credentials** (ADR-0004): `tracking/` holding **Track** (binds
 `fedexTrackOAuth2Api`), and `shipping/` holding **Get Rates**, **Create**, and **Validate** (binds
 `fedexShippingOAuth2Api` — the shipping project bundles Rate + Ship + Address Validation under one
-key). Resource = FedEx project, operation = verb; credentials bind per operation (operation values
-are globally unique). Keep files focused (<800 lines), one resource per folder, so operations stay
+key). Resource = FedEx project, operation = verb. Credentials are selected by a hidden
+`authentication` parameter derived per-operation (gated on `displayOptions.show.authentication`,
+**not** on `operation` directly): n8n's declarative routing resolves multi-credential nodes only via
+a parameter literally named `authentication`, and gating on `operation` broke AI-Agent **tool**
+execution with `Could not get parameter: authentication` (fixed 0.2.1 — see ADR-0004). Keep files
+focused (<800 lines), one resource per folder, so operations stay
 independent and the pattern is reusable for a future UPS package. The rationale behind the resource
 model and the sandbox/production credential design is captured in the public `docs/adr/` notes; the
 captured FedEx specs they reference live in the private `internal/fedex-docs/`.
