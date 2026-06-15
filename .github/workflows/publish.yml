@@ -102,3 +102,26 @@ jobs:
         #     Workflow filename:    publish.yml
         #     Environment:          (leave blank)
         run: pnpm run release
+
+  # Creates the GitHub Release for the tag after npm publish succeeds. Kept in a
+  # separate job so the publish job above stays least-privilege (contents: read).
+  github-release:
+    name: GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to create the release.
+      contents: write
+
+    steps:
+      - name: Create GitHub Release from tag
+        # Auto-generates notes from the commits/PRs since the previous release.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag
