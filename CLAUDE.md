@@ -100,8 +100,9 @@ descriptions live in `nodes/Fedex/resources/<resource>/` (scaffold ships example
 `company/` — replace with two noun-resources: `shipment/` holding the **Track**, **Get Rates**, and
 **Create** operations, and `address/` holding **Validate**). Resource = noun, operation = verb (n8n
 idiom). Keep files focused (<800 lines), one resource per folder, so operations stay independent and
-the pattern is reusable for a future UPS package. See `docs/adr/` for the rationale behind the
-resource model and the sandbox/production credential design.
+the pattern is reusable for a future UPS package. The rationale behind the resource model and the
+sandbox/production credential design is captured in the local `docs/adr/` notes (kept out of the
+published repo, like `fedex-docs/` and `documentation.yaml`).
 
 ## Hard constraints (these will fail the build / lint if violated)
 

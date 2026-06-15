@@ -153,6 +153,7 @@ fedex-docs/.DS_Store
 /.agents/
 /fedex-docs/
 /docs/adr/
+/docs/manual-review-video-script.md
 /AGENTS.md
 /fedex-node-build-brief.md
 /documentation.yaml
