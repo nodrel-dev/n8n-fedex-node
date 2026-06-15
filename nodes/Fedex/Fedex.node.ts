@@ -21,7 +21,21 @@ export class Fedex implements INodeType {
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'fedexOAuth2Api', required: true }],
+		// Track is a separate FedEx project from the shipping APIs, so each operation binds the
+		// matching credential type (operation values are globally unique, so keying on operation
+		// alone is unambiguous). See ADR-0004.
+		credentials: [
+			{
+				name: 'fedexTrackOAuth2Api',
+				required: true,
+				displayOptions: { show: { operation: ['track'] } },
+			},
+			{
+				name: 'fedexShippingOAuth2Api',
+				required: true,
+				displayOptions: { show: { operation: ['getRates', 'create', 'validate'] } },
+			},
+		],
 		requestDefaults: {
 			// Base URL follows the credential's Environment so token exchange and API calls
 			// always target the same FedEx host (ADR-0001).

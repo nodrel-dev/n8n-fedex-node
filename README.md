@@ -95,25 +95,23 @@ You authenticate with a FedEx **API Key** and **Secret Key** using OAuth2 client
 3. The portal issues an **API Key** (client ID) and **Secret Key** (client secret) for both a **test/sandbox** project and, once approved, a **production** project.
 4. For Get Rates and Create you also need your FedEx **shipping account number**.
 
-### Set up the credential in n8n
+### Two credential types (one per FedEx project)
 
-1. Add a new **FedEx OAuth2 API** credential.
+The FedEx Developer Portal provisions the **Track API** in a different group from the **shipping** APIs (Rate, Ship, Address Validation), so a single portal project usually cannot hold all four — each project issues its own API Key / Secret Key. The node mirrors this with **two credential types**, and each operation automatically uses the right one:
+
+- **FedEx Track OAuth2 API** → from the project that has the Track API → used by **Track**.
+- **FedEx Shipping OAuth2 API** → from the project that has Rate + Ship + Address Validation → used by **Get Rates**, **Create**, and **Validate**.
+
+If your portal account provisions all four APIs in one project, use the same API Key / Secret Key in both credentials.
+
+### Set up a credential in n8n
+
+1. Add a new **FedEx Track OAuth2 API** or **FedEx Shipping OAuth2 API** credential (the node shows the right field per operation).
 2. Set **Environment** to **Sandbox (Test)** while developing, or **Production (Live)** for real shipments. This single switch points both the OAuth token URL and every API request at the matching FedEx host, so a request can never straddle sandbox and production.
 3. Enter your **Client ID** (FedEx API Key) and **Client Secret** (FedEx Secret Key).
-4. Save — n8n will fetch a token to confirm the credentials work.
+4. Save — n8n runs the credential test against that API and shows a green confirmation when the keys are valid.
 
-> **Sandbox vs production:** the credential defaults to **Sandbox** on purpose, so a half-configured connection can't hit a live account. Switch to **Production** only when you are ready to create real, billable shipments.
-
-### You will likely need two FedEx projects (and two credentials)
-
-The FedEx Developer Portal provisions the **Track API** in a different group from the **shipping** APIs (Rate, Ship, Address Validation), so a single portal project usually cannot hold all four — each project issues its own API Key / Secret Key.
-
-This node handles that cleanly: create **two** _FedEx OAuth2 API_ credentials in n8n and select the right one per node.
-
-- **Track credential** → from the project that has the Track API → use on **Track** nodes.
-- **Shipping credential** → from the project that has Rate + Ship + Address Validation → use on **Get Rates**, **Create**, and **Validate** nodes.
-
-(If your portal account does provision all four APIs in one project, a single credential is fine.)
+> **Sandbox vs production:** credentials default to **Sandbox** on purpose, so a half-configured connection can't hit a live account. Switch to **Production** only when you are ready to create real, billable shipments.
 
 ### Production: Create (Ship) requires FedEx label certification
 

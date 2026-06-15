@@ -26,7 +26,10 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": ["dist/credentials/FedexOAuth2Api.credentials.js"],
+    "credentials": [
+      "dist/credentials/FedexTrackOAuth2Api.credentials.js",
+      "dist/credentials/FedexShippingOAuth2Api.credentials.js"
+    ],
     "nodes": ["dist/nodes/Fedex/Fedex.node.js"]
   },
   "devDependencies": {
