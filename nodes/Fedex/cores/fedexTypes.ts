@@ -1,5 +1,5 @@
 // Typed FedEx request shapes produced by the pure cores (ADR-0003). These mirror
-// the authoritative OpenAPI specs in fedex-docs/json-schemas and are intentionally
+// the authoritative OpenAPI specs in internal/fedex-docs/json-schemas and are intentionally
 // free of any n8n coupling so the cores stay unit-testable in isolation.
 
 export interface FedexAddress {

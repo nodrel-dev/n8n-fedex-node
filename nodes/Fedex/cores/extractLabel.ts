@@ -9,7 +9,7 @@ export interface LabelMime {
 	ext: string;
 }
 
-// encodedLabel imageType -> binary MIME type + file extension (confirmed in documentation.yaml).
+// encodedLabel imageType -> binary MIME type + file extension (confirmed in internal/documentation.yaml).
 export const LABEL_MIME: Record<string, LabelMime> = {
 	PDF: { mime: 'application/pdf', ext: 'pdf' },
 	PNG: { mime: 'image/png', ext: 'png' },

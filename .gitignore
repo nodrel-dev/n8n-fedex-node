@@ -146,17 +146,12 @@ fedex-docs/.DS_Store
 # macOS
 .DS_Store
 
-# Internal planning/reference — kept local, never published
-/specs/
-/.specify/
+# Internal docs, reference specs & planning — consolidated under internal/, which is
+# its own private git repo (nodrel-dev/n8n-fedex-node-internal). Never published.
+# Run ./bootstrap-internal.sh on a fresh clone to restore it. See CLAUDE.md.
+/internal/
+
+# Local Claude session dir + machine-local runtime state (never leave this machine)
 /.claude/
-/.agents/
-/fedex-docs/
-/docs/adr/
-/docs/manual-review-video-script.md
-/scripts/n8n-demo.sh
-/AGENTS.md
-/fedex-node-build-brief.md
-/documentation.yaml
 dev.sh
 .jwt-secret
