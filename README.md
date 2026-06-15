@@ -180,6 +180,10 @@ FedEx error messages (`errors[].message`) are surfaced directly through n8n's er
 
 ## Version history
 
+### 0.1.3
+
+Credentials: the single FedEx OAuth2 credential is split into **FedEx Track OAuth2 API** and **FedEx Shipping OAuth2 API**, each with its own connection test so n8n shows a green credential-test result. Each operation automatically uses the matching credential (Track vs Rate/Ship/Address). **Breaking:** re-create your credentials using the new types.
+
 ### 0.1.2
 
 Documentation and packaging only: README badges, Snyk + provenance security notes, and an MIT `LICENSE` file. No functional node changes.
