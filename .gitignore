@@ -154,6 +154,7 @@ fedex-docs/.DS_Store
 /fedex-docs/
 /docs/adr/
 /docs/manual-review-video-script.md
+/scripts/n8n-demo.sh
 /AGENTS.md
 /fedex-node-build-brief.md
 /documentation.yaml
