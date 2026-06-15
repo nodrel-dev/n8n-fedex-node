@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📦 n8n-nodes-fedex
+# 📦 n8n-fedex-node
 
 **Use the FedEx REST API directly in your n8n workflows.**
 
