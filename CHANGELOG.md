@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.1.5...0.2.0) (2026-06-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* the node's resource values changed from shipment/address to tracking/shipping; workflows pinned to the old values must reselect.
+
+### Features
+
+* regroup node resources to mirror FedEx projects (Tracking, Shipping) ([8ce08e6](https://github.com/nodrel-dev/n8n-fedex-node/commit/8ce08e6b6d9522db9bf930f7617847afaf4af6d7))
+
+
+### Bug Fixes
+
+* drop incremental compilation to prevent stale dist builds ([ad53eca](https://github.com/nodrel-dev/n8n-fedex-node/commit/ad53eca47276b79d0470855f454ed91142bdc633))
+
 ## [0.1.5](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.1.4...0.1.5) (2026-06-15)
 
 
