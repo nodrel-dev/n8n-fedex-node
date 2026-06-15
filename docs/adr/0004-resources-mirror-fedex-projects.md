@@ -22,12 +22,24 @@ Model the node so **each resource maps 1:1 to a FedEx project and binds that pro
 | **Tracking** | Track                                        | `fedexTrackOAuth2Api`    | Track         |
 | **Shipping** | Get Rates, Create, Validate                  | `fedexShippingOAuth2Api` | Shipping      |
 
-Credentials are bound per **operation** (operation values — `track`, `getRates`, `create`,
-`validate` — are globally unique, so `displayOptions.show.operation` is unambiguous and does not
-need to also key on resource). Each credential carries its **own** `test` request against an
-endpoint it is actually entitled to call (Track → `/track/v1/trackingnumbers`; Shipping →
-`/address/v1/addresses/resolve`, which needs no account number), so a wrong key fails the
-credential test instead of failing later mid-workflow.
+Credentials are selected by a hidden **`authentication`** parameter whose value (the credential
+name, `fedexTrackOAuth2Api` / `fedexShippingOAuth2Api`) is derived from `operation` via
+per-operation `displayOptions` defaults. The credentials are gated on
+`displayOptions.show.authentication`, not on `operation` directly. Each credential carries its
+**own** `test` request against an endpoint it is actually entitled to call
+(Track → `/track/v1/trackingnumbers`; Shipping → `/address/v1/addresses/resolve`, which needs no
+account number), so a wrong key fails the credential test instead of failing later mid-workflow.
+
+> **Why `authentication`, not `operation` (ADR amendment, 0.2.1).** The node originally gated the
+> two credentials directly on `displayOptions.show.operation`. That works for normal execution but
+> **breaks when the node runs as an AI-Agent tool**: n8n's declarative routing engine
+> (`routing-node` `prepareCredentials`) disambiguates among 2+ credentials by reading a parameter
+> *literally named* `authentication` and matching each credential's
+> `displayOptions.show.authentication`. With no such parameter, the tool-execution path threw
+> `Could not get parameter: authentication` (the agent then retried to max iterations). The fix
+> adds a hidden `authentication` parameter, derived from `operation`, so the value resolves
+> automatically on both the normal and tool paths with no manual auth pick. The `operation` values
+> are still globally unique; `authentication` is purely the routing engine's required discriminator.
 
 ## Considered Options
 
