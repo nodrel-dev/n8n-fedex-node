@@ -118,6 +118,10 @@ FedEx error messages (`errors[].message`) are surfaced directly through n8n's er
 
 ## Version history
 
+### 0.1.2
+
+Documentation and packaging only: README badges, Snyk + provenance security notes, and an MIT `LICENSE` file. No functional node changes.
+
 ### 0.1.1
 
 Supply-chain hardening, no functional node changes: npm publishing moved to keyless **OIDC trusted publishing** with signed provenance, and CI/release workflows run on the Node 24 GitHub Actions runtime.

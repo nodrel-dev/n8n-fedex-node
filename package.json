@@ -1,6 +1,6 @@
 {
   "name": "@nodrel-dev/n8n-nodes-fedex",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publishConfig": { "access": "public" },
   "description": "n8n community node for the FedEx REST API — track shipments, get rates, create shipping labels, and validate addresses directly against your own FedEx account.",
   "license": "MIT",
