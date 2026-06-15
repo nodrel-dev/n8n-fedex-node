@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.0...0.2.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* correct placeholder doc URLs in node metadata ([8e4907f](https://github.com/nodrel-dev/n8n-fedex-node/commit/8e4907f9cbcf3026ca3d3a25acebbc4496b7552c))
+* resolve credentials via hidden authentication param for AI-Agent tool use ([#12](https://github.com/nodrel-dev/n8n-fedex-node/issues/12)) ([4d2de0b](https://github.com/nodrel-dev/n8n-fedex-node/commit/4d2de0b7ea892b16d31d1e82a1818e68752de36b))
+
 ## [0.2.0](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.1.5...0.2.0) (2026-06-15)
 
 
