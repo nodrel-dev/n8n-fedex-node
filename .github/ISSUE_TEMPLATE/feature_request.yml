@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a new operation or improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: The use case or limitation you're hitting.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should the node do? If it maps to a specific FedEx API, link or name it.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New FedEx operation (e.g. Pickup, Locations, Service Availability)
+        - Existing operation — more fields/options
+        - Credentials / auth
+        - Output shape / binary handling
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds
+      description: Anything you've tried or considered.

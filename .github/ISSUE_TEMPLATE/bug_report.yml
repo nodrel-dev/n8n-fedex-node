@@ -1,0 +1,76 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! **Do not paste FedEx API keys, secret keys, account numbers, or
+        OAuth tokens** anywhere in this issue — redact them first.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+      placeholder: When I run "Get Rates" with…, I expected… but got…
+    validations:
+      required: true
+  - type: dropdown
+    id: operation
+    attributes:
+      label: Which operation?
+      options:
+        - Track (Tracking)
+        - Get Rates (Shipping)
+        - Create shipment / label (Shipping)
+        - Validate address (Shipping)
+        - Credential setup / OAuth
+        - Other / not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: FedEx environment
+      options:
+        - Sandbox
+        - Production
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add a FedEx node…
+        2. Set operation to…
+        3. Run…
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message / output
+      description: Paste the error from n8n. Redact any credentials or account numbers first.
+      render: text
+  - type: input
+    id: node-version
+    attributes:
+      label: n8n-nodes-fedex version
+      placeholder: e.g. 0.2.0
+    validations:
+      required: true
+  - type: input
+    id: n8n-version
+    attributes:
+      label: n8n version
+      placeholder: e.g. 2.25.7
+    validations:
+      required: true
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have removed all credentials, secret keys, and account numbers from this report.
+          required: true
