@@ -1,5 +1,15 @@
 # Single credential with an Environment switch for sandbox vs production
 
+> **Status (updated 2026-06-15): partially superseded by [ADR-0004](0004-resources-mirror-fedex-projects.md).**
+> The "single credential type" decision below no longer holds — FedEx issues disjoint per-project
+> entitlements, so the node now ships **two** credential types (`fedexTrackOAuth2Api` and
+> `fedexShippingOAuth2Api`), not the one `fedexOAuth2Api` described here. **The Environment switch
+> mechanism in this ADR is still in force**: both credentials share it via
+> `FEDEX_OAUTH2_PROPERTIES` / `FEDEX_TEST_BASE_URL` in `credentials/fedexOAuth2Shared.ts`, so the
+> token URL and the API base URL still derive from one `environment` dropdown (default `sandbox`)
+> and can never split hosts. Read the rest of this ADR for the Environment-switch rationale only;
+> read ADR-0004 for the credential model.
+
 FedEx exposes separate hosts for sandbox (`apis-sandbox.fedex.com`) and production
 (`apis.fedex.com`), and both the OAuth token URL and every API base URL must target the same one.
 We use **one** credential type (`fedexOAuth2Api`, extending n8n's `oAuth2Api` with

@@ -19,9 +19,15 @@ We assemble these shapes in **pure cores** rather than per-field routing:
 - The label and rate reshaping follow the same pattern: `extractLabel(response, imageType)` (see
   ADR-0002) and `shapeRates(response)` are pure cores behind thin `postReceive` hooks.
 
-A narrow **vitest** runner covers these pure cores, asserted against captured
-`fedex-docs/json-schemas` fixtures. It is scoped to the cores only; it does not test routing and
-does not replace sandbox verification.
+A narrow **vitest** runner covers these pure cores with hand-written cases informed by the captured
+FedEx OpenAPI specs (`internal/fedex-docs/json-schemas/`). It is scoped to the cores only; it does
+not test routing and does not replace sandbox verification.
+
+> **Note (updated 2026-06-15):** two details below drifted from the original draft. (1) The tests
+> assert against **inline literal cases**, not loaded fixture files — the schemas inform the cases
+> but are not read at test time. (2) The captured specs moved to the private `internal/fedex-docs/`
+> companion repo (see ADR/handoff on the docs split), so the path is
+> `internal/fedex-docs/json-schemas/`, not `fedex-docs/json-schemas/`.
 
 ## Why this is allowed under "declarative-first" (constitution III)
 
@@ -49,7 +55,10 @@ declarative (`INodeProperties` builders); only the request/response *transform* 
 - The constitution's quality-gates section is amended (1.0.0 → 1.1.0) to bring a unit-test runner
   into scope for the pure cores; operation-level verification stays manual against sandbox.
 - One `vitest` devDependency. Test files live beside the cores; the runner targets the pure cores
-  only and is not a green-toolchain release gate (lint --strict + build remain the gates).
+  only and is not a green-toolchain release gate (`pnpm lint` + `pnpm build` remain the gates).
+  Lint strictness comes from `n8n.strict: true` in `package.json`, which `n8n-node lint` applies
+  automatically — there is **no** `--strict` flag in `@n8n/node-cli` 0.34.0 (an earlier draft and
+  CLAUDE.md referenced `lint --strict`, which the CLI rejects as a nonexistent flag).
 - The node gains a uniform pattern: a small set of pure, fixture-tested cores
   (`toFedexAddress`, `toFedexContact`, `extractLabel`, `shapeRates`) behind thin preSend/postReceive
   adapters, with declarative routing for everything else. Reusable for a future UPS package.

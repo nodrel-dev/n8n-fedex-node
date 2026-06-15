@@ -8,9 +8,11 @@ A publishable **n8n community node** (`n8n-nodes-fedex`) that talks **directly**
 REST API — no aggregator middleman. The value prop: businesses with their own negotiated FedEx
 accounts hit the carrier API with their own rates. npm has no direct FedEx node today.
 
-**Status:** scaffolded (declarative/custom template, `@n8n/node-cli` 0.34.0), `pnpm install`
-done, `pnpm build` + `pnpm lint` verified green-toolchain. The node still contains the
-**placeholder `User`/`Company` resources** — these must be replaced with the four real operations.
+**Status:** shipped — npm `0.2.0` is the current release (declarative/custom template,
+`@n8n/node-cli` 0.34.0). All **four real operations are implemented** across two resources
+(Tracking: Track; Shipping: Get Rates, Create, Validate) with their two credentials; the
+placeholder `User`/`Company` scaffold resources are gone. `pnpm build` + `pnpm lint` + `pnpm test`
+are green. Remaining work is operation-level sandbox verification and hardening, not initial build.
 The full spec, decided scope, API map, and acceptance criteria live in
 **`internal/fedex-node-build-brief.md`** (read it first). All doc links are centralized in
 **`documentation.yaml`** — consult it before web-searching for any FedEx or n8n reference. The
@@ -46,12 +48,20 @@ n8n-node new n8n-nodes-fedex --template declarative/custom
 # Inside the repo:
 n8n-node dev      # run n8n locally with the node loaded + live rebuild (manual testing)
 n8n-node build    # compile + copy assets (icons etc.)
-n8n-node lint      # lint with auto-fix
-n8n-node lint --strict   # CI gate: also verifies eslint config is UNCHANGED from default
+n8n-node lint      # lint (strict by default — reads n8n.strict:true in package.json)
+n8n-node lint --fix      # lint with auto-fix
+pnpm test         # vitest — unit tests for the pure cores (see ADR-0003)
 n8n-node release  # publish to npm / n8n community registry
 ```
 
-There is no separate unit-test runner in scope; **verification is manual** via `n8n-node dev`
+> There is **no** `--strict` flag in `@n8n/node-cli` 0.34.0 (the CLI rejects it as nonexistent).
+> Lint strictness — including the "eslint config unchanged from default" check — comes from
+> `n8n.strict: true` in `package.json`, which plain `n8n-node lint` applies. The CI gates are
+> `pnpm lint` + `pnpm build`.
+
+A narrow **vitest** runner (`pnpm test`) covers the pure assembly/extraction cores
+(`toFedexAddress`, `toFedexContact`, `extractLabel`, `shapeRates`) — see ADR-0003. It is not a
+release gate and does not replace **manual operation-level verification** via `n8n-node dev`
 against the FedEx sandbox (sandbox tracking numbers + test account numbers are in the portal docs).
 
 ## Architecture (the non-obvious parts)
@@ -71,21 +81,26 @@ the chosen `imageType` (`PDF`→`application/pdf`, `PNG`→`image/png`, `ZPLII`/
 JSON (tracking number, rates) through on the main output. Send `labelResponseOptions: LABEL` to get
 the base64 inline (vs `URL_ONLY`). The full confirmed enum lists are in `documentation.yaml`.
 
-**Auth — the scaffold uses n8n's built-in OAuth2.** The generated credential
-`FedexOAuth2Api` (`credentials/FedexOAuth2Api.credentials.ts`, credential name `fedexOAuth2Api`)
-**`extends ['oAuth2Api']` with `grantType: clientCredentials`**. This means n8n performs the
-token exchange and **caches/refreshes the ~1h token natively** — do NOT hand-roll token code.
-What still needs fixing before it works:
-- `scope` → must be **empty**. FedEx's `client_credentials` flow derives the scope from the
-  client's registration and **rejects an explicit `scope` param** (`BAD.REQUEST.ERROR: No
-  registered scope value for this client has been requested`, HTTP 400). Sending `CXS` (despite
-  what `authorization.json` implies) breaks token exchange; verified against sandbox 2026-06-14.
-  FedEx returns the effective scope (e.g. `CXS-TP`) on a successful token response.
-- `accessTokenUrl` → currently hardcoded to `api.example.com`. Must become the FedEx token URL,
-  and must support **sandbox vs prod** (`apis-sandbox.fedex.com` vs `apis.fedex.com`). Decide how:
-  a user-set field on the credential, or two credential variants. This is the open auth design point.
-- Add the required **`icon`** property (lint error until then).
-- The node's `requestDefaults.baseURL` is likewise hardcoded to prod — tie it to the same env choice.
+**Auth — n8n's built-in OAuth2, two credential types.** FedEx issues disjoint per-project
+entitlements (a token for one project gets 403 on another's endpoints — ADR-0004), so the node
+ships **two** credential classes, both `extends ['oAuth2Api']` with `grantType: clientCredentials`:
+- `FedexTrackOAuth2Api` (`credentials/FedexTrackOAuth2Api.credentials.ts`, name `fedexTrackOAuth2Api`) — Track.
+- `FedexShippingOAuth2Api` (`credentials/FedexShippingOAuth2Api.credentials.ts`, name `fedexShippingOAuth2Api`) — Rate / Ship / Validate.
+
+Everything they share (the `environment` dropdown, hidden OAuth fields, the env-derived
+`accessTokenUrl`) lives in `credentials/fedexOAuth2Shared.ts` as `FEDEX_OAUTH2_PROPERTIES` /
+`FEDEX_TEST_BASE_URL`; each class adds only its own `test` request against an endpoint it is
+entitled to call. n8n performs the token exchange and **caches/refreshes the ~1h token natively**
+— do NOT hand-roll token code. The original scaffold open items are all resolved:
+- `scope` is **empty** ✓. FedEx's `client_credentials` flow derives the scope from the client's
+  registration and **rejects an explicit `scope` param** (`BAD.REQUEST.ERROR: No registered scope
+  value for this client has been requested`, HTTP 400). Sending `CXS` (despite what
+  `authorization.json` implies) breaks token exchange; verified against sandbox 2026-06-14. FedEx
+  returns the effective scope (e.g. `CXS-TP`) on a successful token response.
+- `accessTokenUrl` and the node's `requestDefaults.baseURL` both **derive from the single
+  `environment` field** (`sandbox` default → `apis-sandbox.fedex.com`; `production` →
+  `apis.fedex.com`), so token exchange and API calls can never split hosts (ADR-0001).
+- The **`icon`** property is set on both credentials.
 
 `client_id`/`client_secret` map to the FedEx **API Key / Secret Key**. FedEx errors: surface
 `errors[].message`; treat `4xx` validation distinctly. Exact OAuth shape: `documentation.yaml` → `fedex.auth`.
@@ -113,7 +128,7 @@ captured FedEx specs they reference live in the private `internal/fedex-docs/`.
 ## Hard constraints (these will fail the build / lint if violated)
 
 - **pnpm only.** npm breaks the install.
-- **Do not modify the eslint config** — `n8n-node lint --strict` fails if it differs from default.
+- **Do not modify the eslint config** — `n8n-node lint` (strict via `n8n.strict:true`) fails if it differs from default.
 - **Verify FedEx field names / paths against live docs** before coding each operation — versions
   drift. `documentation.yaml` flags which entries need re-verification (`verify: true`).
 - Surface the real FedEx error (`errors[].message`) via `NodeApiError` / `NodeOperationError`;

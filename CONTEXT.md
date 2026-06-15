@@ -7,15 +7,21 @@ FedEx account and negotiated rates with no aggregator in between.
 
 ### Operations & resources
 
+The node has **two resources**, named to mirror the two FedEx dev-portal projects (ADR-0004):
+**Tracking** (the **Track** operation) and **Shipping** (the **Get Rates**, **Create**, and
+**Validate** operations). The nouns below are the domain concepts the operations act on, not the
+resource names.
+
 **Shipment**:
 The noun for the three shipment verbs — **Track** (status of an existing shipment by tracking
 number), **Get Rates** (price a prospective shipment), and **Create** (buy a shipment and get a
-label). One of the node's two resources.
+label). Track lives under the **Tracking** resource; Get Rates and Create live under **Shipping**.
 _Avoid_: parcel, package (a Shipment may contain a package but is not one), order
 
 **Address**:
-The node's second resource, exposing **Validate** — standardize an address and classify it
-residential vs commercial. Independent of any Shipment.
+The thing **Validate** acts on — standardize an address and classify it residential vs commercial.
+Validate lives under the **Shipping** resource (it shares the shipping project's credential), and is
+independent of any Shipment.
 _Avoid_: location, destination (those are roles an Address plays, not the term)
 
 ### Rates & labels
@@ -58,10 +64,9 @@ _Avoid_: mode, stage, test/prod (as a schema name)
 
 - **Two projects / two credentials.** The FedEx Developer Portal provisions the **Track API**
   separately from the shipping APIs (Rate, Ship, Address Validation); one project usually can't
-  hold all four, and each project issues its own App Credentials. n8n supports multiple
-  credentials of one type, so the user makes two `fedexOAuth2Api` credentials and selects the
-  right one per node — Track on Track nodes, the shipping credential on Get Rates / Create /
-  Validate. No code impact; documented in the README.
+  hold all four, and each project issues its own App Credentials. The node ships **two credential
+  types** — `fedexTrackOAuth2Api` (Track) and `fedexShippingOAuth2Api` (Get Rates / Create /
+  Validate) — and binds the right one per operation automatically (ADR-0004). Documented in the README.
 - **Ship label certification (production only).** Before FedEx authorizes *production* credentials
   to transmit live label transactions, the **Create** operation's sample labels must pass the
   FedEx Bar Code Analysis group review (~3 business-day turnaround, approval is per project).
