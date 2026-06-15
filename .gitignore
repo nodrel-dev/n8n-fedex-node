@@ -152,6 +152,9 @@ fedex-docs/.DS_Store
 /.claude/
 /.agents/
 /fedex-docs/
+/docs/adr/
 /AGENTS.md
 /fedex-node-build-brief.md
 /documentation.yaml
+dev.sh
+.jwt-secret

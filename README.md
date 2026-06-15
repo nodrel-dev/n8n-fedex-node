@@ -1,4 +1,10 @@
-# n8n-nodes-fedex
+<div align="center">
+
+# 📦 n8n-nodes-fedex
+
+**Use the FedEx REST API directly in your n8n workflows.**
+
+Track shipments · validate addresses · quote rates · create labels — against _your own_ FedEx account, with no aggregator in the middle.
 
 [![npm version](https://img.shields.io/npm/v/@nodrel-dev/n8n-nodes-fedex?logo=npm&color=cb3837)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
 [![npm downloads](https://img.shields.io/npm/dm/@nodrel-dev/n8n-nodes-fedex)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
@@ -6,19 +12,47 @@
 [![license: MIT](https://img.shields.io/npm/l/@nodrel-dev/n8n-nodes-fedex)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
 [![published with provenance](https://img.shields.io/badge/published%20with-provenance-3b82f6?logo=npm)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex#provenance)
 
-This is an [n8n](https://n8n.io/) community node. It lets you use the **FedEx REST API** directly in your n8n workflows — track shipments, validate addresses, quote rates, and create shipping labels against your own FedEx account, with no aggregator in the middle.
+[Installation](#installation) · [Operations](#operations) · [Credentials](#credentials) · [Usage](#usage) · [npm](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex) · [FedEx Developer Portal](https://developer.fedex.com/) · [Report an issue](https://github.com/nodrel-dev/n8n-fedex-node/issues)
 
-Because the node talks straight to FedEx with your API credentials, you get **your own negotiated rates** and your account is billed directly.
+</div>
 
-[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
+## What is this?
 
-[Installation](#installation)
-[Operations](#operations)
-[Credentials](#credentials)
-[Compatibility](#compatibility)
-[Usage](#usage)
-[Resources](#resources)
-[Version history](#version-history)
+This is an [n8n](https://n8n.io/) community node for the **FedEx REST API**. It lets your workflows track shipments, validate addresses, quote rates, and create shipping labels — talking straight to FedEx with your own API credentials.
+
+Because there's no aggregator in the middle, you get **your own negotiated rates** and FedEx bills your account directly. [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
+
+### Highlights
+
+- 🚚 **Direct to FedEx** — your API keys, your negotiated rates, your account billed. No aggregator markup or middleman.
+- 🏷️ **Labels as real binary** — Create returns a print-ready PDF / PNG / ZPL / EPL label as n8n binary data, not a base64 blob buried in JSON.
+- 🔀 **One sandbox / production switch** — a single credential field repoints every API request and the OAuth token URL together, so a call can never straddle environments.
+- 🔐 **Native OAuth2, no token code** — n8n performs the client-credentials exchange and refreshes the ~1 hour token for you.
+- 📦 **Zero runtime dependencies** — ships only `dist/`, published to npm with signed [provenance](https://docs.npmjs.com/generating-provenance-statements) and scanned on every push by Dependabot and Snyk.
+
+## Who it's for
+
+- **E-commerce & retail** — print labels at fulfillment, surface tracking to customers, and rate-shop services per order.
+- **3PLs & fulfillment ops** — automate shipping for many accounts and wire labels into existing pick-and-pack flows.
+- **Finance & operations teams** — quote live negotiated rates inside approval and reconciliation workflows.
+- **Developers & integrators** — embed FedEx tracking, address validation, and labels into any n8n automation without hand-rolling OAuth.
+
+## How it works
+
+The node sits between your workflow and FedEx. A single **FedEx OAuth2** credential holds your API key/secret and the sandbox-or-production switch; n8n handles the token exchange, and every request is routed to the matching FedEx host.
+
+```mermaid
+flowchart LR
+    subgraph wf["n8n workflow"]
+        prev["Upstream node"] --> fedex["FedEx node"]
+        fedex --> down["Downstream node<br/>(Write Binary File,<br/>Send Email, …)"]
+    end
+
+    cred["FedEx OAuth2 credential<br/>API Key + Secret Key<br/>Sandbox / Production"]
+    cred -. "n8n exchanges and refreshes token" .-> fedex
+
+    fedex -->|"HTTPS + bearer token"| api["FedEx REST API<br/>(your account and rates)"]
+```
 
 ## Installation
 
@@ -27,6 +61,18 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 ## Operations
 
 The node exposes two resources: **Shipment** and **Address**.
+
+```mermaid
+flowchart TD
+    node["FedEx node"]
+    node --> shipment["📦 Shipment"]
+    node --> address["📍 Address"]
+
+    shipment --> track["Track<br/>POST /track/v1/trackingnumbers"]
+    shipment --> rates["Get Rates<br/>POST /rate/v1/rates/quotes"]
+    shipment --> create["Create<br/>POST /ship/v1/shipments"]
+    address --> validate["Validate<br/>POST /address/v1/addresses/resolve"]
+```
 
 ### Shipment
 
@@ -95,7 +141,25 @@ Both operations share the same **Shipper** and **Recipient** address/contact fie
 
 ### The label binary (Create)
 
-Create returns the label as proper n8n **binary data** on the output property named `label` — not a base64 string buried in JSON. Choose the format with **Label Format**:
+Create returns the label as proper n8n **binary data** on the output property named `label` — not a base64 string buried in JSON. Under the hood, the node requests an inline base64 label, decodes it, and attaches it as binary so downstream nodes can print or save it directly:
+
+```mermaid
+sequenceDiagram
+    participant WF as n8n workflow
+    participant Node as FedEx node
+    participant Auth as OAuth2 (n8n-managed)
+    participant API as FedEx Ship API
+
+    WF->>Node: Execute "Create"
+    Node->>Auth: Need access token
+    Auth-->>Node: Cached / refreshed token (~1h)
+    Node->>API: POST /ship/v1/shipments<br/>(labelResponseOptions: LABEL)
+    API-->>Node: JSON + base64 encodedLabel
+    Node->>Node: Decode base64 →<br/>attach as binary "label"
+    Node-->>WF: JSON (tracking #, rates)<br/>+ binary label
+```
+
+Choose the format with **Label Format**:
 
 | Label Format | MIME type | Typical use |
 |---|---|---|
