@@ -1,5 +1,11 @@
 # n8n-nodes-fedex
 
+[![npm version](https://img.shields.io/npm/v/@nodrel-dev/n8n-nodes-fedex?logo=npm&color=cb3837)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
+[![npm downloads](https://img.shields.io/npm/dm/@nodrel-dev/n8n-nodes-fedex)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
+[![CI](https://github.com/nodrel-dev/n8n-fedex-node/actions/workflows/ci.yml/badge.svg)](https://github.com/nodrel-dev/n8n-fedex-node/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/npm/l/@nodrel-dev/n8n-nodes-fedex)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)
+[![published with provenance](https://img.shields.io/badge/published%20with-provenance-3b82f6?logo=npm)](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex#provenance)
+
 This is an [n8n](https://n8n.io/) community node. It lets you use the **FedEx REST API** directly in your n8n workflows — track shipments, validate addresses, quote rates, and create shipping labels against your own FedEx account, with no aggregator in the middle.
 
 Because the node talks straight to FedEx with your API credentials, you get **your own negotiated rates** and your account is billed directly.
@@ -77,6 +83,10 @@ Sandbox label creation works immediately. **Production** is different: before Fe
 
 The published package ships only `dist/` with **zero runtime dependencies** (`n8n-workflow` is a peer, provided by your n8n instance). Any `pnpm audit` / Dependabot findings are confined to the build, test, and release tooling or the host-provided peer — none of them reach an installed node. Outstanding upstream advisories (waiting on newer `@n8n/node-cli` and `n8n-workflow` releases) are tracked in [#2](https://github.com/nodrel-dev/n8n-fedex-node/issues/2).
 
+The repository is continuously scanned for vulnerabilities by both **Dependabot** and **[Snyk](https://snyk.io/)** — Snyk checks dependencies and source on every push and pull request, so each release commit is scanned before it ships.
+
+Every release is published to npm with a signed **[provenance](https://docs.npmjs.com/generating-provenance-statements) attestation** through GitHub Actions [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers): no long-lived npm token is stored in the repo, and anyone can cryptographically verify that a given version was built by this workflow from this exact commit (see the **Provenance** panel on the [npm page](https://www.npmjs.com/package/@nodrel-dev/n8n-nodes-fedex)).
+
 ## Usage
 
 ### Get Rates and Create
@@ -107,6 +117,10 @@ FedEx error messages (`errors[].message`) are surfaced directly through n8n's er
 - [FedEx API documentation](https://developer.fedex.com/api/en-us/catalog.html)
 
 ## Version history
+
+### 0.1.1
+
+Supply-chain hardening, no functional node changes: npm publishing moved to keyless **OIDC trusted publishing** with signed provenance, and CI/release workflows run on the Node 24 GitHub Actions runtime.
 
 ### 0.1.0
 
