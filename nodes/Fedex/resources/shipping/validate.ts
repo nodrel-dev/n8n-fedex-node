@@ -1,7 +1,7 @@
 import type { IDataObject, IExecuteSingleFunctions, IHttpRequestOptions, INodeProperties } from 'n8n-workflow';
 import { toFedexAddress } from '../../cores/toFedexAddress';
 
-const show = { resource: ['address'], operation: ['validate'] };
+const show = { resource: ['shipping'], operation: ['validate'] };
 
 // Validate reuses the shared Address core but with its own field names (it has no
 // shipper/recipient role). Names are kept local to avoid colliding with the shipment fields.

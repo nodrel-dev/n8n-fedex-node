@@ -1,6 +1,6 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
-import { shipmentDescription } from './resources/shipment';
-import { addressDescription } from './resources/address';
+import { trackingDescription } from './resources/tracking';
+import { shippingDescription } from './resources/shipping';
 
 export class Fedex implements INodeType {
 	description: INodeTypeDescription = {
@@ -21,9 +21,10 @@ export class Fedex implements INodeType {
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		// Track is a separate FedEx project from the shipping APIs, so each operation binds the
-		// matching credential type (operation values are globally unique, so keying on operation
-		// alone is unambiguous). See ADR-0004.
+		// Each resource mirrors a FedEx dev-portal project and binds that project's credential:
+		// Tracking → fedexTrackOAuth2Api, Shipping (Rate/Ship/Address Validation) →
+		// fedexShippingOAuth2Api. The two projects have disjoint entitlements, so a token from one
+		// 403s on the other. Keyed on operation (values are globally unique). See ADR-0004.
 		credentials: [
 			{
 				name: 'fedexTrackOAuth2Api',
@@ -53,13 +54,13 @@ export class Fedex implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'Address', value: 'address' },
-					{ name: 'Shipment', value: 'shipment' },
+					{ name: 'Shipping', value: 'shipping' },
+					{ name: 'Tracking', value: 'tracking' },
 				],
-				default: 'shipment',
+				default: 'tracking',
 			},
-			...shipmentDescription,
-			...addressDescription,
+			...trackingDescription,
+			...shippingDescription,
 		],
 	};
 }

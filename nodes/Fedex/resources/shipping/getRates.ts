@@ -17,7 +17,7 @@ import {
 } from '../../fields';
 import { readAddressInput, readPackageLineItem, readString, requireAccountNumber } from '../shared';
 
-const show = { resource: ['shipment'], operation: ['getRates'] };
+const show = { resource: ['shipping'], operation: ['getRates'] };
 
 export const getRatesFields: INodeProperties[] = [
 	accountNumberField(show),

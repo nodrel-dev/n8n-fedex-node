@@ -2,7 +2,7 @@ import type { IDataObject, IExecuteSingleFunctions, IHttpRequestOptions, INodePr
 import { NodeOperationError } from 'n8n-workflow';
 import { readBoolean, readString } from '../shared';
 
-const show = { resource: ['shipment'], operation: ['track'] };
+const show = { resource: ['tracking'], operation: ['track'] };
 
 export const trackFields: INodeProperties[] = [
 	{

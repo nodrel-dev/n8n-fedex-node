@@ -96,13 +96,15 @@ node field — never a default, never hardcoded. Same for API keys and base URLs
 **File layout (scaffolded).** Package lives at repo root; reference docs (`fedex-docs/`,
 `documentation.yaml`, `fedex-node-build-brief.md`) sit alongside but are excluded from the npm
 tarball (`package.json` `files: ["dist"]`). The node is `nodes/Fedex/Fedex.node.ts`; per-resource
-descriptions live in `nodes/Fedex/resources/<resource>/` (scaffold ships example `user/` +
-`company/` — replace with two noun-resources: `shipment/` holding the **Track**, **Get Rates**, and
-**Create** operations, and `address/` holding **Validate**). Resource = noun, operation = verb (n8n
-idiom). Keep files focused (<800 lines), one resource per folder, so operations stay independent and
-the pattern is reusable for a future UPS package. The rationale behind the resource model and the
-sandbox/production credential design is captured in the local `docs/adr/` notes (kept out of the
-published repo, like `fedex-docs/` and `documentation.yaml`).
+descriptions live in `nodes/Fedex/resources/<resource>/`. The two resources **mirror the two FedEx
+dev-portal projects / credentials** (ADR-0004): `tracking/` holding **Track** (binds
+`fedexTrackOAuth2Api`), and `shipping/` holding **Get Rates**, **Create**, and **Validate** (binds
+`fedexShippingOAuth2Api` — the shipping project bundles Rate + Ship + Address Validation under one
+key). Resource = FedEx project, operation = verb; credentials bind per operation (operation values
+are globally unique). Keep files focused (<800 lines), one resource per folder, so operations stay
+independent and the pattern is reusable for a future UPS package. The rationale behind the resource
+model and the sandbox/production credential design is captured in the local `docs/adr/` notes (kept
+out of the published repo, like `fedex-docs/` and `documentation.yaml`).
 
 ## Hard constraints (these will fail the build / lint if violated)
 

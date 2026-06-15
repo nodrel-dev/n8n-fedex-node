@@ -22,7 +22,7 @@ import {
 import { LABEL_IMAGE_OPTIONS, LABEL_STOCK_OPTIONS } from '../../constants';
 import { readAddressInput, readContactInput, readPackageLineItem, readString, requireAccountNumber } from '../shared';
 
-const show = { resource: ['shipment'], operation: ['create'] };
+const show = { resource: ['shipping'], operation: ['create'] };
 
 export const createFields: INodeProperties[] = [
 	accountNumberField(show),
