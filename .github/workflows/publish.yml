@@ -17,25 +17,18 @@
 #
 # ─── ONE-TIME SETUP ────────────────────────────────────────────────────────────
 #
-# Option A — OIDC Trusted Publishing (recommended, no long-lived secrets):
-#   1. Log in to npmjs.com and open your package's settings.
-#   2. Under "Publish access" → "Trusted Publishers", click "Add a publisher".
-#   3. Select GitHub Actions and fill in:
-#        Repository owner: <your-github-username-or-org>
-#        Repository name:  <your-repo-name>
-#        Workflow name:    publish.yml
-#        Environment:      (leave blank unless you use GitHub Environments)
-#   4. Leave the NPM_TOKEN secret unset in this repository. GitHub's OIDC
-#      token is used instead — no secret ever touches your repo settings.
+# This workflow authenticates to npm via OIDC Trusted Publishing — no long-lived
+# NPM_TOKEN secret. Configure the trusted publisher once on npmjs.com:
+#   1. Log in to npmjs.com and open this package's settings:
+#        @nodrel-dev/n8n-nodes-fedex → Settings → Trusted Publisher
+#   2. Click "Add a publisher" / "GitHub Actions" and fill in:
+#        Organization or user: nodrel-dev
+#        Repository:           n8n-fedex-node
+#        Workflow filename:    publish.yml
+#        Environment:          (leave blank unless you use GitHub Environments)
+#   3. Save. No secret ever touches the repo — GitHub's OIDC token is used.
 #
-# Option B — npm Automation Token (fallback):
-#   1. On npmjs.com: Access Tokens → Generate New Token → Granular Access Token.
-#      Scope it to this package with "Read and write" publish permission.
-#   2. In GitHub: Settings → Secrets and variables → Actions → New secret.
-#      Name it NPM_TOKEN and paste the token value.
-#
-# Both options work with --provenance. Provenance is signed by GitHub's OIDC
-# infrastructure regardless of how npm authentication is handled.
+# Provenance is signed automatically by GitHub's OIDC infrastructure.
 #
 # ─── TAG CONVENTION ────────────────────────────────────────────────────────────
 #
@@ -96,15 +89,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Release
-        # Publishes to npm with a provenance attestation (requires id-token: write above).
-        # Lint and build run automatically as part of the release process.
+        # Publishes to npm via OIDC Trusted Publishing — no NPM_TOKEN secret needed.
+        # npm authenticates using the workflow's OIDC identity (requires id-token:
+        # write above and npm >= 11.5.1, installed above). Provenance is signed
+        # automatically. Lint and build run as part of the release process.
         #
-        # Option A (OIDC): leave NPM_TOKEN unset — the token step is skipped and
-        #   npm uses the OIDC exchange instead.
-        # Option B (token): set NPM_TOKEN in repo secrets — it is written to
-        #   .npmrc here before publishing.
-        run: |
-          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
-          pnpm run release
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # PREREQUISITE: the trusted publisher must be configured once on npmjs.com
+        # for @nodrel-dev/n8n-nodes-fedex →
+        #   Settings → Trusted Publisher → GitHub Actions
+        #     Organization or user: nodrel-dev
+        #     Repository:           n8n-fedex-node
+        #     Workflow filename:    publish.yml
+        #     Environment:          (leave blank)
+        run: pnpm run release
