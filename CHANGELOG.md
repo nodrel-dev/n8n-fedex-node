@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.1.4...0.1.5) (2026-06-15)
+
+
+### Bug Fixes
+
+* keep tsconfig.tsbuildinfo out of the published tarball ([bea835d](https://github.com/nodrel-dev/n8n-fedex-node/commit/bea835dfba4d38099261f52555ac1c2262294859))
+
 ## [0.1.4](https://github.com/nodrel-dev/n8n-fedex-node/compare/n8n-nodes-fedex-v0.1.3...n8n-nodes-fedex-v0.1.4) (2026-06-15)
 
 
