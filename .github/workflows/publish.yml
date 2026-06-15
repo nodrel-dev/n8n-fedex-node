@@ -47,7 +47,11 @@ jobs:
   publish:
     name: Publish to npm
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    # Runs when release-please cuts a new release, OR on a manual workflow_dispatch.
+    # The manual path is a retry escape hatch: if a publish fails after the tag +
+    # GitHub Release already exist (release-please won't re-emit them), dispatch
+    # this workflow to publish the version currently in package.json.
+    if: ${{ needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -78,11 +82,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
-
-      # Authenticates via the workflow's OIDC identity (Trusted Publishing) and
-      # signs provenance automatically — no NPM_TOKEN. Publishes the version that
-      # release-please already bumped in package.json.
+      # `n8n-node release` is the only supported publish path: the package's
+      # prepublishOnly hook (`n8n-node prerelease`) hard-exits unless RELEASE_MODE
+      # is set, and only `release` sets it. In CI it auto-detects GitHub Actions
+      # and runs lint + build, then `npm publish` with RELEASE_MODE=true and
+      # NPM_CONFIG_PROVENANCE=true. Authenticates via the workflow's OIDC identity
+      # (Trusted Publishing) — no NPM_TOKEN — and signs provenance automatically.
+      # Publishes the version release-please already bumped in package.json.
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: pnpm run release
