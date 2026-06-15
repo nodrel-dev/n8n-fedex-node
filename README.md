@@ -172,6 +172,15 @@ The tracking number and rate details are passed through on the main JSON output.
 
 FedEx error messages (`errors[].message`) are surfaced directly through n8n's error handling, and the node honors **Continue On Fail** — failed items emit an `error` entry and the workflow keeps processing the rest.
 
+## Documentation
+
+Deeper docs for contributors and integrators live in [`docs/`](docs/):
+
+- [System Overview](docs/system-overview.md) — architecture, auth/environment model, request lifecycle (with diagrams).
+- [Integration Specification](docs/integration-spec.md) — endpoints, request/response shapes, enums, and error handling for all four operations.
+- [Data Model](docs/data-model.md) — the typed shapes the node assembles, and the node-parameter → FedEx-field mapping.
+- [Architecture Decision Records](docs/adr/) — why the key design choices were made.
+
 ## Resources
 
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
@@ -180,18 +189,4 @@ FedEx error messages (`errors[].message`) are surfaced directly through n8n's er
 
 ## Version history
 
-### 0.1.3
-
-Credentials: the single FedEx OAuth2 credential is split into **FedEx Track OAuth2 API** and **FedEx Shipping OAuth2 API**, each with its own connection test so n8n shows a green credential-test result. Each operation automatically uses the matching credential (Track vs Rate/Ship/Address). **Breaking:** re-create your credentials using the new types.
-
-### 0.1.2
-
-Documentation and packaging only: README badges, Snyk + provenance security notes, and an MIT `LICENSE` file. No functional node changes.
-
-### 0.1.1
-
-Supply-chain hardening, no functional node changes: npm publishing moved to keyless **OIDC trusted publishing** with signed provenance, and CI/release workflows run on the Node 24 GitHub Actions runtime.
-
-### 0.1.0
-
-Initial release. Shipment (Track, Get Rates, Create) and Address (Validate) operations, sandbox/production environment switch, and label-as-binary output.
+See [CHANGELOG.md](CHANGELOG.md) for the full, per-release history (kept current automatically on each release).
