@@ -39,7 +39,10 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      # Pinned to v5 (node24 runtime). v4 ran on node20, which GitHub Actions
+      # deprecated and force-migrates to node24 as of 2026-06-16 — v5's only
+      # breaking change is that runtime bump (inputs unchanged).
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
