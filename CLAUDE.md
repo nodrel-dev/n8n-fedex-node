@@ -64,6 +64,28 @@ A narrow **vitest** runner (`pnpm test`) covers the pure assembly/extraction cor
 release gate and does not replace **manual operation-level verification** via `n8n-node dev`
 against the FedEx sandbox (sandbox tracking numbers + test account numbers are in the portal docs).
 
+## Releases & versioning (CI/CD — do NOT bump manually)
+
+**release-please drives versioning from Conventional Commits — never hand-edit the version.**
+`.github/workflows/publish.yml` runs on every push to `main`: it reads commit messages
+(`fix:` / `feat:` / `feat!:`) and maintains a standing **release PR** that bumps `package.json` +
+`CHANGELOG.md`. **Merging that release PR** cuts the git tag + GitHub Release, which triggers the
+`publish` job → `pnpm run release` → npm via **OIDC Trusted Publishing** (no `NPM_TOKEN`). Do **not**
+run `n8n-node release` locally or bump `package.json` / `.release-please-manifest.json` by hand — the
+pipeline owns all of it.
+
+- **Pre-1.0 bump rules** (`release-please-config.json`): `fix:` → patch, `feat:` → patch
+  (`bump-patch-for-minor-pre-major`), `feat!:` / `BREAKING CHANGE` → minor. So everything is a patch
+  until 1.0.
+- **To ship a change:** land it on `main` with the right Conventional Commit type (a metadata-only
+  edit like the `Fedex.node.json` codex still counts as `fix:` — the registry consumes it), then
+  merge the release PR release-please opens.
+- **`publish.yml` filename is load-bearing:** npm Trusted Publishing is bound to this exact filename.
+  Don't rename it even though it now also runs release-please.
+- **Retry escape hatch:** if a publish fails *after* the tag/Release already exist, `workflow_dispatch`
+  the Release workflow to publish the version currently in `package.json` (release-please won't
+  re-emit an existing tag).
+
 ## Architecture (the non-obvious parts)
 
 **Declarative vs programmatic — decide per operation.** Use **declarative** routing (in the node
@@ -142,6 +164,7 @@ captured FedEx specs they reference live in the private `internal/fedex-docs/`.
 
 ## Reference shortcuts
 
+- **n8n/FedEx gotchas & burns (read before editing the node, creds, build, or release)** → `docs/n8n-gotchas.md`
 - Full spec & acceptance criteria → `internal/fedex-node-build-brief.md`
 - All doc URLs, local doc map, confirmed endpoints/enums, OAuth shape → `documentation.yaml`
 - FedEx request/response shapes → `internal/fedex-docs/json-schemas/*.json` (OpenAPI, authoritative);
