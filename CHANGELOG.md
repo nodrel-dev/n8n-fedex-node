@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.1...0.2.2) (2026-06-16)
+
+
+### Bug Fixes
+
+* correct codex node identifier and category for registry approval ([#13](https://github.com/nodrel-dev/n8n-fedex-node/issues/13)) ([e8d7921](https://github.com/nodrel-dev/n8n-fedex-node/commit/e8d7921a37352649e8e760e14227ee70ded7b683))
+
 ## [0.2.1](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.0...0.2.1) (2026-06-15)
 
 
