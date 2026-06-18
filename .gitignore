@@ -155,3 +155,7 @@ fedex-docs/.DS_Store
 /.claude/
 dev.sh
 .jwt-secret
+
+# Local tooling / editor scaffolding — not useful to public consumers
+/.specify/
+/.vscode/
