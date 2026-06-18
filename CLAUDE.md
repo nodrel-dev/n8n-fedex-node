@@ -132,11 +132,11 @@ node field — never a default, never hardcoded. Same for API keys and base URLs
 
 **File layout.** Package lives at repo root. Most docs are **public, in this repo** (they never ship
 to npm — `files: ["dist"]` — but version alongside the code): `docs/adr/`, `CONTEXT.md`,
-`documentation.yaml`, `AGENTS.md` + `.agents/`, `specs/`. Only two things stay **private** under
+`documentation.yaml`, `AGENTS.md` + `.agents/`. Three things stay **private** under
 **`internal/`** (its own private repo `nodrel-dev/n8n-fedex-node-internal`, gitignored here, restored
 on a fresh clone via `./bootstrap-internal.sh`): `internal/fedex-docs/` (FedEx's copyrighted captured
-specs) and `internal/fedex-node-build-brief.md` (commercial strategy). Never commit secrets to
-either repo. The node is `nodes/Fedex/Fedex.node.ts`; per-resource
+specs), `internal/fedex-node-build-brief.md` (commercial strategy), and `internal/specs/` (the
+spec-kit feature spec & planning). Never commit secrets to either repo. The node is `nodes/Fedex/Fedex.node.ts`; per-resource
 descriptions live in `nodes/Fedex/resources/<resource>/`. The two resources **mirror the two FedEx
 dev-portal projects / credentials** (ADR-0004): `tracking/` holding **Track** (binds
 `fedexTrackOAuth2Api`), and `shipping/` holding **Get Rates**, **Create**, and **Validate** (binds
