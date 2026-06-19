@@ -115,9 +115,12 @@ emitted directly.
 | Credential | `fedexShippingOAuth2Api` |
 | Transform | `getRatesPreSend` (request) + `getRatesPostReceive` → `shapeRates` (response) |
 
-**Inputs:** Shipping Account Number (required), shipper address, recipient address (+ residential),
-pickup type, service type (optional — blank asks for all services), package weight/unit and optional
-dimensions.
+**Inputs (flat/required):** Shipping Account Number, shipper address, recipient address, service
+type (optional — blank asks for all services), package weight/unit. **Additional Fields collection
+(optional):** the **Recipient Is Residential** flag, pickup type, and parcel dimensions
+(length/width/height + unit). The collection only returns the entries the user added, so each
+omitted value falls back to its default in `getRatesPreSend` / the shared readers (for example
+`pickupType` → `USE_SCHEDULED_PICKUP`).
 
 **Request body**
 
@@ -163,9 +166,13 @@ as `negotiatedRate`; missing values are `null`.
 | Credential | `fedexShippingOAuth2Api` |
 | Transform | `createPreSend` (request) + `createPostReceive` → `extractLabel` (response) |
 
-**Inputs:** Shipping Account Number (required), shipper address + contact, recipient address (+
-residential) + contact, service type (required), packaging type, pickup type, package
-weight/dimensions, **Label Format** (`imageType`), **Label Stock Type**.
+**Inputs (flat/required):** Shipping Account Number, shipper address + contact name/phone, recipient
+address + contact name/phone, service type (required, defaults to `FEDEX_GROUND`), package
+weight/unit, **Label Format** (`imageType`). **Additional Fields collection (optional):** shipper /
+recipient company name and email, the **Recipient Is Residential** flag, packaging type, pickup type,
+parcel dimensions, and **Label Stock Type**. Omitted collection entries fall back to their defaults in
+`createPreSend` / the shared readers (`packagingType` → `YOUR_PACKAGING`, `pickupType` →
+`USE_SCHEDULED_PICKUP`, `labelStockType` → `PAPER_4X6`).
 
 **Request body (abridged)**
 
@@ -192,7 +199,9 @@ weight/dimensions, **Label Format** (`imageType`), **Label Stock Type**.
 
 Note the structural difference from Get Rates: Create uses `recipients` as an **array**, Get Rates
 uses a singular `recipient`. `shippingChargesPayment` is always `SENDER` in v1. `labelResponseOptions: LABEL`
-asks FedEx to inline the base64 label rather than a URL.
+asks FedEx to inline the base64 label rather than a URL. `serviceType` defaults to `FEDEX_GROUND` so
+the dropdown opens on a real value; `packagingType`, `pickupType`, and `labelStockType` take the
+defaults shown above when their Additional Fields entries are not added.
 
 **Output (after `extractLabel`)**
 

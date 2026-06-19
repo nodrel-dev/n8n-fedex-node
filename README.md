@@ -77,8 +77,8 @@ flowchart TD
 ### Shipment
 
 - **Track** — Get the status and scan history for one or more tracking numbers (`POST /track/v1/trackingnumbers`). Toggle **Track Multiple Numbers** to pass a comma-separated list, and **Include Detailed Scans** for the full scan event history.
-- **Get Rates** — Quote negotiated and list rates for available services (`POST /rate/v1/rates/quotes`). Leave **Service Type** as _All Available Services_ to compare every eligible service, or pin a single one. Requires a **Shipping Account Number**.
-- **Create** — Buy a shipment and get a printable label plus tracking number (`POST /ship/v1/shipments`). The label is returned as **n8n binary data** (see [Usage](#usage)). Requires a **Shipping Account Number**.
+- **Get Rates** — Quote negotiated and list rates for available services (`POST /rate/v1/rates/quotes`). Leave **Service Type** as _All Available Services_ to compare every eligible service, or pin a single one. Requires a **Shipping Account Number**. The panel shows a short required core (addresses, weight); optional inputs live under **Additional Fields**.
+- **Create** — Buy a shipment and get a printable label plus tracking number (`POST /ship/v1/shipments`). The label is returned as **n8n binary data** (see [Usage](#usage)). Requires a **Shipping Account Number**. **Service Type** defaults to **FedEx Ground**; optional inputs (company, email, packaging, label stock, dimensions, …) live under **Additional Fields**.
 
 ### Address
 
@@ -135,7 +135,9 @@ Every release is published to npm with a signed **[provenance](https://docs.npmj
 
 ### Get Rates and Create
 
-Both operations share the same **Shipper** and **Recipient** address/contact fields, so values carry over when you switch between them. Package dimensions (length/width/height) are optional and only sent to FedEx when all three are greater than zero.
+Both operations share the same **Shipper** and **Recipient** address/contact fields, so values carry over when you switch between them.
+
+Only the fields a shipment genuinely needs sit flat at the top of the panel — addresses, contact name and phone, weight, and (for Create) service and label format. Everything optional is grouped under a single **Additional Fields** collection: company name, email, the **Recipient Is Residential** flag, **Pickup Type**, **Packaging Type**, **Label Stock Type**, and parcel dimensions. Add only what you need; anything you leave out falls back to the same FedEx default it always used. Package dimensions (length/width/height) are still only sent to FedEx when all three are greater than zero.
 
 ### The label binary (Create)
 
