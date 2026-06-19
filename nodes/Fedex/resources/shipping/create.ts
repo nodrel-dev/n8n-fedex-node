@@ -14,13 +14,19 @@ import {
 	accountNumberField,
 	addressFields,
 	contactFields,
+	createAdditionalFields,
 	packageFields,
-	packagingTypeField,
-	pickupTypeField,
 	serviceTypeField,
 } from '../../fields';
 import { LABEL_IMAGE_OPTIONS, LABEL_STOCK_OPTIONS } from '../../constants';
-import { readAddressInput, readContactInput, readPackageLineItem, readString, requireAccountNumber } from '../shared';
+import {
+	readAddressInput,
+	readAdditional,
+	readContactInput,
+	readPackageLineItem,
+	readString,
+	requireAccountNumber,
+} from '../shared';
 
 const show = { resource: ['shipping'], operation: ['create'] };
 
@@ -28,11 +34,9 @@ export const createFields: INodeProperties[] = [
 	accountNumberField(show),
 	...addressFields('shipper', show),
 	...contactFields('shipper', show),
-	...addressFields('recipient', show, { residential: true }),
+	...addressFields('recipient', show),
 	...contactFields('recipient', show),
 	serviceTypeField(show, true),
-	packagingTypeField(show),
-	pickupTypeField(show),
 	...packageFields(show),
 	{
 		displayName: 'Label Format',
@@ -43,45 +47,45 @@ export const createFields: INodeProperties[] = [
 		displayOptions: { show },
 		description: 'The image format of the returned label, delivered as a binary file attachment',
 	},
-	{
-		displayName: 'Label Stock Type',
-		name: 'labelStockType',
-		type: 'options',
-		options: LABEL_STOCK_OPTIONS,
-		default: 'PAPER_4X6',
-		displayOptions: { show },
-	},
+	createAdditionalFields(show, LABEL_STOCK_OPTIONS),
 ];
 
 export async function createPreSend(
 	this: IExecuteSingleFunctions,
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
+	const extra = readAdditional(this);
+	const packagingType = String(extra.packagingType ?? '').trim() || 'YOUR_PACKAGING';
+	const pickupType = String(extra.pickupType ?? '').trim() || 'USE_SCHEDULED_PICKUP';
+	const labelStockType = String(extra.labelStockType ?? '').trim() || 'PAPER_4X6';
+
 	const body: IDataObject = {
 		labelResponseOptions: 'LABEL',
 		accountNumber: { value: requireAccountNumber(this) },
 		requestedShipment: {
 			shipper: {
-				address: toFedexAddress(readAddressInput(this, 'shipper')),
-				contact: toFedexContact(readContactInput(this, 'shipper')),
+				address: toFedexAddress(readAddressInput(this, 'shipper', extra)),
+				contact: toFedexContact(readContactInput(this, 'shipper', extra)),
 			},
 			recipients: [
 				{
-					address: toFedexAddress(readAddressInput(this, 'recipient', { residential: true })),
-					contact: toFedexContact(readContactInput(this, 'recipient')),
+					address: toFedexAddress(
+						readAddressInput(this, 'recipient', extra, { residential: true }),
+					),
+					contact: toFedexContact(readContactInput(this, 'recipient', extra)),
 				},
 			],
 			serviceType: readString(this, 'serviceType'),
-			packagingType: readString(this, 'packagingType', 'YOUR_PACKAGING'),
-			pickupType: readString(this, 'pickupType', 'USE_SCHEDULED_PICKUP'),
+			packagingType,
+			pickupType,
 			// v1 always bills the configured Shipping Account (FR-008a, spec clarification).
 			shippingChargesPayment: { paymentType: 'SENDER' },
 			labelSpecification: {
 				imageType: readString(this, 'labelImageType', 'PDF'),
-				labelStockType: readString(this, 'labelStockType', 'PAPER_4X6'),
+				labelStockType,
 				labelFormatType: 'COMMON2D',
 			},
-			requestedPackageLineItems: [readPackageLineItem(this)],
+			requestedPackageLineItems: [readPackageLineItem(this, extra)],
 		},
 	};
 
@@ -95,7 +99,11 @@ export async function createPostReceive(
 ): Promise<INodeExecutionData[]> {
 	try {
 		const label = extractLabel(response.body, readString(this, 'labelImageType', 'PDF'));
-		const binary = await this.helpers.prepareBinaryData(label.buffer, label.fileName, label.mimeType);
+		const binary = await this.helpers.prepareBinaryData(
+			label.buffer,
+			label.fileName,
+			label.mimeType,
+		);
 
 		return [
 			{

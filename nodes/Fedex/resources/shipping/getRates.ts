@@ -11,21 +11,27 @@ import { shapeRates } from '../../cores/shapeRates';
 import {
 	accountNumberField,
 	addressFields,
+	getRatesAdditionalFields,
 	packageFields,
-	pickupTypeField,
 	serviceTypeField,
 } from '../../fields';
-import { readAddressInput, readPackageLineItem, readString, requireAccountNumber } from '../shared';
+import {
+	readAddressInput,
+	readAdditional,
+	readPackageLineItem,
+	readString,
+	requireAccountNumber,
+} from '../shared';
 
 const show = { resource: ['shipping'], operation: ['getRates'] };
 
 export const getRatesFields: INodeProperties[] = [
 	accountNumberField(show),
 	...addressFields('shipper', show),
-	...addressFields('recipient', show, { residential: true }),
-	pickupTypeField(show),
+	...addressFields('recipient', show),
 	serviceTypeField(show, false),
 	...packageFields(show),
+	getRatesAdditionalFields(show),
 ];
 
 export async function getRatesPreSend(
@@ -33,16 +39,20 @@ export async function getRatesPreSend(
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
 	const serviceType = readString(this, 'serviceType');
+	const extra = readAdditional(this);
+	const pickupType = String(extra.pickupType ?? '').trim() || 'USE_SCHEDULED_PICKUP';
 
 	const body: IDataObject = {
 		accountNumber: { value: requireAccountNumber(this) },
 		rateRequestControlParameters: { returnTransitTimes: true },
 		requestedShipment: {
-			shipper: { address: toFedexAddress(readAddressInput(this, 'shipper')) },
-			recipient: { address: toFedexAddress(readAddressInput(this, 'recipient', { residential: true })) },
-			pickupType: readString(this, 'pickupType', 'USE_SCHEDULED_PICKUP'),
+			shipper: { address: toFedexAddress(readAddressInput(this, 'shipper', extra)) },
+			recipient: {
+				address: toFedexAddress(readAddressInput(this, 'recipient', extra, { residential: true })),
+			},
+			pickupType,
 			rateRequestType: ['ACCOUNT', 'LIST'],
-			requestedPackageLineItems: [readPackageLineItem(this)],
+			requestedPackageLineItems: [readPackageLineItem(this, extra)],
 			...(serviceType ? { serviceType } : {}),
 		},
 	};

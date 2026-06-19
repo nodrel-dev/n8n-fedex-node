@@ -94,27 +94,41 @@ classDiagram
 
 ## Node parameter → FedEx field mapping
 
-| Node parameter | FedEx field (via core) | Used by |
-| -------------- | ---------------------- | ------- |
-| `{role}StreetLines` | `address.streetLines[]` (split, max 3) | Validate, Get Rates, Create |
-| `{role}City` | `address.city` | Validate, Get Rates, Create |
-| `{role}StateOrProvinceCode` | `address.stateOrProvinceCode` (omitted if blank) | Validate, Get Rates, Create |
-| `{role}PostalCode` | `address.postalCode` | Validate, Get Rates, Create |
-| `{role}CountryCode` | `address.countryCode` (default `US`) | Validate, Get Rates, Create |
-| `recipientResidential` | `address.residential` (recipient only) | Get Rates, Create |
-| `{role}PersonName` | `contact.personName` | Create |
-| `{role}CompanyName` | `contact.companyName` | Create |
-| `{role}PhoneNumber` | `contact.phoneNumber` (required) | Create |
-| `{role}EmailAddress` | `contact.emailAddress` | Create |
-| `shippingAccountNumber` | `accountNumber.value` (required) | Get Rates, Create |
-| `packageWeight` / `weightUnit` | `requestedPackageLineItems[0].weight` | Get Rates, Create |
-| `packageLength/Width/Height` / `dimensionUnit` | `requestedPackageLineItems[0].dimensions` (sent only when all three greater than 0) | Get Rates, Create |
-| `serviceType` | `requestedShipment.serviceType` | Get Rates (optional), Create (required) |
-| `labelImageType` | `labelSpecification.imageType` + binary MIME | Create |
-| `labelStockType` | `labelSpecification.labelStockType` | Create |
+"Surface" is where the operator enters the value: **Flat** = a top-level field; **Additional Fields**
+= an entry inside the single optional `additionalFields` collection (see
+[fields.ts](https://github.com/nodrel-dev/n8n-fedex-node/blob/main/nodes/Fedex/fields.ts)).
+
+| Node parameter | FedEx field (via core) | Surface | Used by |
+| -------------- | ---------------------- | ------- | ------- |
+| `{role}StreetLines` | `address.streetLines[]` (split, max 3) | Flat | Validate, Get Rates, Create |
+| `{role}City` | `address.city` | Flat | Validate, Get Rates, Create |
+| `{role}StateOrProvinceCode` | `address.stateOrProvinceCode` (omitted if blank) | Flat | Validate, Get Rates, Create |
+| `{role}PostalCode` | `address.postalCode` | Flat | Validate, Get Rates, Create |
+| `{role}CountryCode` | `address.countryCode` (default `US`) | Flat | Validate, Get Rates, Create |
+| `recipientResidential` | `address.residential` (recipient only) | Additional Fields | Get Rates, Create |
+| `{role}PersonName` | `contact.personName` | Flat | Create |
+| `{role}CompanyName` | `contact.companyName` | Additional Fields | Create |
+| `{role}PhoneNumber` | `contact.phoneNumber` (required) | Flat | Create |
+| `{role}EmailAddress` | `contact.emailAddress` | Additional Fields | Create |
+| `shippingAccountNumber` | `accountNumber.value` (required) | Flat | Get Rates, Create |
+| `packageWeight` / `weightUnit` | `requestedPackageLineItems[0].weight` | Flat | Get Rates, Create |
+| `packageLength/Width/Height` / `dimensionUnit` | `requestedPackageLineItems[0].dimensions` (sent only when all three greater than 0) | Additional Fields | Get Rates, Create |
+| `pickupType` | `requestedShipment.pickupType` (default `USE_SCHEDULED_PICKUP`) | Additional Fields | Get Rates, Create |
+| `packagingType` | `requestedShipment.packagingType` (default `YOUR_PACKAGING`) | Additional Fields | Create |
+| `serviceType` | `requestedShipment.serviceType` | Flat | Get Rates (optional), Create (required, default `FEDEX_GROUND`) |
+| `labelImageType` | `labelSpecification.imageType` + binary MIME | Flat | Create |
+| `labelStockType` | `labelSpecification.labelStockType` (default `PAPER_4X6`) | Additional Fields | Create |
 
 `{role}` is `shipper` or `recipient`; the same builders are reused across Get Rates and Create so
 values carry over when switching operation.
+
+The **Additional Fields** rows live inside one optional `additionalFields` collection rather than as
+flat fields, so the panel reads as a short required core instead of a ~30-field wall. Because a
+collection only returns the entries the user actually added, the per-field defaults are **not**
+auto-materialized; the readers in
+[resources/shared.ts](https://github.com/nodrel-dev/n8n-fedex-node/blob/main/nodes/Fedex/resources/shared.ts)
+(`readAdditional`, `pickString`, `pickNumber`) re-apply the same defaults the old flat fields carried,
+so the assembled FedEx request body is unchanged.
 
 ## The one-Address, four-positions crux
 

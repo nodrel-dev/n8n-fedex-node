@@ -41,6 +41,13 @@ picks a **Resource**, then an **Operation**; n8n shows the fields for that opera
 execute, routes the request to the matching FedEx endpoint. The node is also exposed as an AI agent
 tool (`usableAsTool: true`).
 
+To keep the panel readable, the Get Rates and Create operations show only the genuinely required
+fields flat (addresses, contact name/phone, weight, service/label format) and collapse every optional
+input — company, email, residential flag, pickup/packaging/label-stock choices, and parcel dimensions
+— into a single **Additional Fields** collection (see the cognitive-load audit under
+[docs/audits/](https://github.com/nodrel-dev/n8n-fedex-node/blob/main/docs/audits)). This is a
+presentation change only; the assembled request bodies are unchanged.
+
 Resources mirror the two FedEx developer-portal **projects**, because each project issues its own
 credential and the two have disjoint entitlements (a token for one returns HTTP 403 on the other —
 see [ADR-0004](adr/0004-resources-mirror-fedex-projects.md)):
