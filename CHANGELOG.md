@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.3](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.2...0.2.3) (2026-06-19)
+
+
+### Features
+
+* group optional shipping inputs under Additional Fields ([#21](https://github.com/nodrel-dev/n8n-fedex-node/issues/21)) ([d40a617](https://github.com/nodrel-dev/n8n-fedex-node/commit/d40a6178bc681ef0dafd3118e9c70613bcf00315))
+
+
+### Bug Fixes
+
+* clarify FedEx credential setup with key-mapping notice ([#19](https://github.com/nodrel-dev/n8n-fedex-node/issues/19)) ([37acc28](https://github.com/nodrel-dev/n8n-fedex-node/commit/37acc282e7988d777ab96a5fd6e4dc6503079837))
+
 ## [0.2.2](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.1...0.2.2) (2026-06-16)
 
 
