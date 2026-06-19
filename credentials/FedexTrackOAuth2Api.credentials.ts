@@ -1,5 +1,9 @@
 import type { Icon, ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
-import { FEDEX_OAUTH2_PROPERTIES, FEDEX_TEST_BASE_URL } from './fedexOAuth2Shared';
+import {
+	FEDEX_OAUTH2_PROPERTIES,
+	FEDEX_TEST_BASE_URL,
+	fedexCredentialNotice,
+} from './fedexOAuth2Shared';
 
 /**
  * Credential for the FedEx Track API project. Use on the Track operation. The credential test
@@ -17,7 +21,10 @@ export class FedexTrackOAuth2Api implements ICredentialType {
 
 	icon: Icon = { light: 'file:fedex.svg', dark: 'file:fedex.dark.svg' };
 
-	properties: INodeProperties[] = FEDEX_OAUTH2_PROPERTIES;
+	properties: INodeProperties[] = [
+		fedexCredentialNotice('the Track API', 'FedEx Shipping OAuth2 API'),
+		...FEDEX_OAUTH2_PROPERTIES,
+	];
 
 	test: ICredentialTestRequest = {
 		request: {
