@@ -22,7 +22,7 @@ export const FEDEX_OAUTH2_PROPERTIES: INodeProperties[] = [
 		],
 		default: 'sandbox',
 		description:
-			'Which FedEx environment to target. Defaults to sandbox so a half-configured connection cannot hit a live account.',
+			'Defaults to Sandbox for safe testing. Switch to Production to bill your live FedEx account.',
 	},
 	{
 		displayName: 'Grant Type',
@@ -67,3 +67,23 @@ export const FEDEX_OAUTH2_PROPERTIES: INodeProperties[] = [
  */
 export const FEDEX_TEST_BASE_URL =
 	'={{ $credentials.environment === "production" ? "https://apis.fedex.com" : "https://apis-sandbox.fedex.com" }}';
+
+/**
+ * A `notice` mapping FedEx's portal terms onto n8n's inherited OAuth2 field labels and flagging
+ * that Track and Shipping draw their keys from different FedEx projects. The inherited oAuth2Api
+ * `clientId` / `clientSecret` fields are NOT re-labelled directly: n8n's credential `extends`
+ * combination is not a guaranteed name-keyed merge, so overriding them risks duplicate fields in
+ * the NDV on some versions — a notice removes the term-translation tax with zero risk to the token
+ * exchange. `project` names the FedEx project these keys come from; `otherCredential` names the
+ * sibling credential that needs its own separate keys (ADR-0004).
+ */
+export function fedexCredentialNotice(project: string, otherCredential: string): INodeProperties {
+	return {
+		displayName:
+			`Enter your FedEx <b>API Key</b> as Client ID and <b>Secret Key</b> as Client Secret (those are the FedEx portal's names for the same values). ` +
+			`Use the keys from the FedEx project that has <b>${project}</b> — the ${otherCredential} credential needs its own separate keys.`,
+		name: 'fedexKeyMappingNotice',
+		type: 'notice',
+		default: '',
+	};
+}
