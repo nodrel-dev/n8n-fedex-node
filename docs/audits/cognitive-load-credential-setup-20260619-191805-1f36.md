@@ -1,5 +1,8 @@
 # Cognitive-Load Audit — Credential setup screen
 
+> **Status: Fixed — 2026-06-20T00:00:00Z**
+> All 4 priority recommendations implemented: notice relabels Client ID/Secret to API Key/Secret Key (#1), notice flags project separation and separate-keys requirement (#2), `#credentials` README anchor verified with full walkthrough (#3), Environment description tightened (#4).
+>
 > Run 2026-06-19. Target = the n8n credential config for `FedexTrackOAuth2Api` /
 > `FedexShippingOAuth2Api`. This is the first-run gate: a user who can't configure a
 > credential never reaches a single operation.

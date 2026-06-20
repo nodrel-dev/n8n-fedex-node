@@ -6,6 +6,7 @@ import {
 	SERVICE_TYPE_OPTIONS,
 	WEIGHT_UNIT_OPTIONS,
 } from './constants';
+import { COUNTRY_OPTIONS } from './countries';
 
 // Presentational INodeProperties builders (ADR-0003: the field surface stays declarative).
 // Roles namespace the shipper vs recipient parameters so both can live in one operation;
@@ -73,11 +74,12 @@ export function addressFields(role: Role, show: Show): INodeProperties[] {
 			displayOptions: { show },
 		},
 		{
-			displayName: `${cap(role)} Country Code`,
+			displayName: `${cap(role)} Country`,
 			name: `${role}CountryCode`,
-			type: 'string',
+			type: 'options',
+			options: COUNTRY_OPTIONS,
 			default: 'US',
-			description: 'Two-letter ISO country code',
+			description: 'Country of the address; the two-letter ISO code is what gets sent to FedEx',
 			displayOptions: { show },
 		},
 	];
@@ -176,6 +178,8 @@ const dimensionEntries: INodeProperties[] = [
 		type: 'number',
 		default: 0,
 		typeOptions: { minValue: 0 },
+		description:
+			'Dimensions are sent only when length, width, and height are all greater than zero',
 	},
 	{
 		displayName: 'Length',
@@ -192,6 +196,8 @@ const dimensionEntries: INodeProperties[] = [
 		type: 'number',
 		default: 0,
 		typeOptions: { minValue: 0 },
+		description:
+			'Dimensions are sent only when length, width, and height are all greater than zero',
 	},
 ];
 
@@ -244,6 +250,7 @@ const labelStockEntry: INodeProperties = {
 	// LABEL_STOCK_OPTIONS imported lazily below to keep the constant list co-located with Create.
 	options: [],
 	default: 'PAPER_4X6',
+	description: 'Paper size or thermal stock the label prints on. Defaults to the standard 4x6.',
 };
 
 /** Wrap a set of optional entries in the standard "Additional Fields" collection. */

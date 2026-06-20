@@ -69,6 +69,27 @@ export class Fedex implements INodeType {
 				],
 				default: 'tracking',
 			},
+			// Credential-fit guidance. n8n type-filters the credential dropdown, so a Track
+			// credential cannot attach to a Shipping operation (or vice versa) — the slot just
+			// stays red with no explanation of why the credential "won't take". These per-resource
+			// notices name the exact credential type each resource needs and point at the
+			// separate-keys-per-project trap (ADR-0004), so the red indicator becomes self-explaining.
+			{
+				displayName:
+					'This resource uses a <b>FedEx Track OAuth2 API</b> credential. If the credential field above is empty or shows a red mark, create or select one of that type — Track and Shipping require separate FedEx project keys, so a Shipping credential cannot be used here.',
+				name: 'trackingCredentialNotice',
+				type: 'notice',
+				default: '',
+				displayOptions: { show: { resource: ['tracking'] } },
+			},
+			{
+				displayName:
+					'These operations use a <b>FedEx Shipping OAuth2 API</b> credential. If the credential field above is empty or shows a red mark, create or select one of that type — Shipping and Track require separate FedEx project keys, so a Track credential cannot be used here.',
+				name: 'shippingCredentialNotice',
+				type: 'notice',
+				default: '',
+				displayOptions: { show: { resource: ['shipping'] } },
+			},
 			...trackingDescription,
 			...shippingDescription,
 			// Hidden auth discriminator the declarative routing engine reads to pick a credential.
