@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.3...0.2.4) (2026-06-20)
+
+
+### Bug Fixes
+
+* cognitive-load UX polish — credential notices, country dropdown, dimension hints ([#22](https://github.com/nodrel-dev/n8n-fedex-node/issues/22)) ([bd2a14a](https://github.com/nodrel-dev/n8n-fedex-node/commit/bd2a14ac774579bacf27adde16f3ba2132a82a48))
+
 ## [0.2.3](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.2...0.2.3) (2026-06-19)
 
 
