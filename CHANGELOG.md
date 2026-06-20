@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.4...0.2.5) (2026-06-20)
+
+
+### Bug Fixes
+
+* NDV UX polish — Create billing hint, deduped notices, Validate country dropdown ([#24](https://github.com/nodrel-dev/n8n-fedex-node/issues/24)) ([61a3e8c](https://github.com/nodrel-dev/n8n-fedex-node/commit/61a3e8cb5149921dff6a58b5f00acd495cc1e106))
+
 ## [0.2.4](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.3...0.2.4) (2026-06-20)
 
 
