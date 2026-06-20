@@ -31,6 +31,17 @@ import {
 const show = { resource: ['shipping'], operation: ['create'] };
 
 export const createFields: INodeProperties[] = [
+	// Honest friction (cognitive-load audit, "What NOT to touch" #2): Create buys a real
+	// shipment and bills the configured account, and the node is usableAsTool, so an AI agent
+	// can invoke it. Surface the cost up front rather than burying it in docs.
+	{
+		displayName:
+			'Running this operation books a real FedEx shipment and bills the Shipping Account below. In Sandbox it is free; in Production it incurs charges.',
+		name: 'createCostNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: { show },
+	},
 	accountNumberField(show),
 	...addressFields('shipper', show),
 	...contactFields('shipper', show),

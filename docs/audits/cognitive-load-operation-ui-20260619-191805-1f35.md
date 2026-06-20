@@ -1,16 +1,22 @@
 # Cognitive-Load / Conversion Audit — FedEx node configuration UI
 
-> **Implementation status (2026-06-19):** Recommendations #1, #2, #3 are **shipped**.
+> **Status: Fixed — 2026-06-20T00:00:00Z**
+> All priority recommendations (#1–#5) plus the "worth adding" Create cost notice are **shipped**.
 > - #1 — optional params (company, email, residential flag, pickup/packaging/label-stock,
 >   parcel dimensions) collapsed into an "Additional Fields" `collection` on Create + Get
 >   Rates. Create's flat panel drops from ~31 fields to ~14 + the collection.
 > - #2 — Create `Service Type` defaults to `FEDEX_GROUND` (no more blank-but-required).
 > - #3 — Phone Number description now states FedEx requires it.
+> - #4 — `${role} Country` is now an ISO 3166-1 dropdown (`COUNTRY_OPTIONS`, default US);
+>   the value stays the two-letter code, so request bodies are unchanged.
+> - #5 — Label Stock Type now has a description; the dimensions all-or-nothing rule is
+>   repeated on Length, Width, and Height (was only on Length).
+> - "Worth adding" (What NOT to touch #2) — Create now carries an inline `notice` that it
+>   books a real shipment and bills the account (free in Sandbox, charged in Production).
 >
 > Locked by characterization tests (`nodes/Fedex/resources/shipping/getRates.presend.test.mts`,
 > `create.presend.test.mts`) proving the emitted FedEx request bodies are byte-identical to
-> pre-refactor. `pnpm test` (16/16) / `build` / `lint` all green. Open: #4 (Country dropdown),
-> #5 (description normalization).
+> pre-refactor. `pnpm test` (16/16) / `build` / `lint` all green.
 
 > Source: `/cognitive-load-conversion` skill, run 2026-06-19. Target = the n8n node
 > parameter panel as defined by the property builders in `nodes/Fedex/`. The property
