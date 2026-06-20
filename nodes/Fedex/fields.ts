@@ -102,7 +102,11 @@ export function contactFields(role: Role, show: Show): INodeProperties[] {
 			default: '',
 			required: true,
 			displayOptions: { show },
-			description: 'FedEx requires a phone number for the shipment contact',
+			// description = hover tooltip (longer, explains why); hint = persistent inline text
+			// (terse). Kept distinct so the two layers don't render identical copy (UX audit, Minor #2).
+			description:
+				'FedEx requires a phone number for the shipment contact. It is used by FedEx and the delivering carrier to reach the sender or recipient about delivery exceptions, and for customs contact on international shipments.',
+			hint: 'FedEx requires a phone number for the shipment contact',
 		},
 	];
 }
@@ -180,6 +184,7 @@ const dimensionEntries: INodeProperties[] = [
 		typeOptions: { minValue: 0 },
 		description:
 			'Dimensions are sent only when length, width, and height are all greater than zero',
+		hint: 'All three dimensions must be > 0 or none are sent',
 	},
 	{
 		displayName: 'Length',
@@ -189,6 +194,7 @@ const dimensionEntries: INodeProperties[] = [
 		typeOptions: { minValue: 0 },
 		description:
 			'Dimensions are sent only when length, width, and height are all greater than zero',
+		hint: 'All three dimensions must be > 0 or none are sent',
 	},
 	{
 		displayName: 'Width',
@@ -198,6 +204,7 @@ const dimensionEntries: INodeProperties[] = [
 		typeOptions: { minValue: 0 },
 		description:
 			'Dimensions are sent only when length, width, and height are all greater than zero',
+		hint: 'All three dimensions must be > 0 or none are sent',
 	},
 ];
 

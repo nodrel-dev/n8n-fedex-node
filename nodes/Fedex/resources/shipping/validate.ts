@@ -1,5 +1,11 @@
-import type { IDataObject, IExecuteSingleFunctions, IHttpRequestOptions, INodeProperties } from 'n8n-workflow';
+import type {
+	IDataObject,
+	IExecuteSingleFunctions,
+	IHttpRequestOptions,
+	INodeProperties,
+} from 'n8n-workflow';
 import { toFedexAddress } from '../../cores/toFedexAddress';
+import { COUNTRY_OPTIONS } from '../../countries';
 
 const show = { resource: ['shipping'], operation: ['validate'] };
 
@@ -15,7 +21,13 @@ export const validateFields: INodeProperties[] = [
 		displayOptions: { show },
 		description: 'Street address. Put each additional line on its own line; up to three are sent.',
 	},
-	{ displayName: 'City', name: 'addressCity', type: 'string', default: '', displayOptions: { show } },
+	{
+		displayName: 'City',
+		name: 'addressCity',
+		type: 'string',
+		default: '',
+		displayOptions: { show },
+	},
 	{
 		displayName: 'State/Province Code',
 		name: 'addressStateOrProvinceCode',
@@ -24,13 +36,20 @@ export const validateFields: INodeProperties[] = [
 		placeholder: 'TN',
 		displayOptions: { show },
 	},
-	{ displayName: 'Postal Code', name: 'addressPostalCode', type: 'string', default: '', displayOptions: { show } },
 	{
-		displayName: 'Country Code',
-		name: 'addressCountryCode',
+		displayName: 'Postal Code',
+		name: 'addressPostalCode',
 		type: 'string',
+		default: '',
+		displayOptions: { show },
+	},
+	{
+		displayName: 'Country',
+		name: 'addressCountryCode',
+		type: 'options',
+		options: COUNTRY_OPTIONS,
 		default: 'US',
-		description: 'Two-letter ISO country code',
+		description: 'Country of the address; the two-letter ISO code is what gets sent to FedEx',
 		displayOptions: { show },
 	},
 ];

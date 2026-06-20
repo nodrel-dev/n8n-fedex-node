@@ -34,9 +34,14 @@ export const createFields: INodeProperties[] = [
 	// Honest friction (cognitive-load audit, "What NOT to touch" #2): Create buys a real
 	// shipment and bills the configured account, and the node is usableAsTool, so an AI agent
 	// can invoke it. Surface the cost up front rather than burying it in docs.
+	//
+	// The credential-fit reminder is merged in here (rather than rendered as a second standalone
+	// notice like shippingCredentialNotice on the other shipping ops) so the Create panel shows a
+	// single yellow block, keeping the high-stakes billing message from being diluted by a stacked
+	// callout (UX audit, Recommended #1).
 	{
 		displayName:
-			'Running this operation books a real FedEx shipment and bills the Shipping Account below. In Sandbox it is free; in Production it incurs charges.',
+			'Running this operation books a real FedEx shipment and bills the Shipping Account below — free in Sandbox, charged in Production. It needs a <b>FedEx Shipping OAuth2 API</b> credential; a Track credential will not work here.',
 		name: 'createCostNotice',
 		type: 'notice',
 		default: '',
