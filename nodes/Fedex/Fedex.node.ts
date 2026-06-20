@@ -19,6 +19,18 @@ export class Fedex implements INodeType {
 		// configured account, so gate it behind human approval in agentic workflows; the
 		// credential defaults to sandbox to keep an unattended agent off a live account.
 		usableAsTool: true,
+		// Node-level warning surfaced in the output pane before execution (in addition to the
+		// field-level createCostNotice) so the billing caution is visible even when the user —
+		// or an AI agent on the usableAsTool path — runs Create without expanding its parameters.
+		hints: [
+			{
+				message: 'Create books a real, billable FedEx shipment (free in Sandbox).',
+				type: 'warning',
+				location: 'outputPane',
+				whenToDisplay: 'beforeExecution',
+				displayCondition: '={{ $parameter["operation"] === "create" }}',
+			},
+		],
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		// Each resource mirrors a FedEx dev-portal project and binds that project's credential:
@@ -82,13 +94,16 @@ export class Fedex implements INodeType {
 				default: '',
 				displayOptions: { show: { resource: ['tracking'] } },
 			},
+			// Shown for Get Rates + Validate only. Create gets the same credential-fit reminder
+			// folded into its cost notice (createCostNotice) so its panel carries a single yellow
+			// block instead of two stacked notices (UX audit, Recommended #1).
 			{
 				displayName:
 					'These operations use a <b>FedEx Shipping OAuth2 API</b> credential. If the credential field above is empty or shows a red mark, create or select one of that type — Shipping and Track require separate FedEx project keys, so a Track credential cannot be used here.',
 				name: 'shippingCredentialNotice',
 				type: 'notice',
 				default: '',
-				displayOptions: { show: { resource: ['shipping'] } },
+				displayOptions: { show: { resource: ['shipping'], operation: ['getRates', 'validate'] } },
 			},
 			...trackingDescription,
 			...shippingDescription,

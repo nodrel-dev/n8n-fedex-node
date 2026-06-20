@@ -26,6 +26,9 @@
     "lint:fix": "n8n-node lint --fix",
     "test": "vitest run",
     "test:watch": "vitest",
+    "harness": "./scripts/fedex-test-harness.sh up",
+    "harness:reset": "./scripts/fedex-test-harness.sh reset",
+    "harness:login": "./scripts/fedex-test-harness.sh login",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
