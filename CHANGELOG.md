@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.5...0.2.6) (2026-06-24)
+
+
+### Bug Fixes
+
+* patch Dependabot + Snyk transitive dep advisories via pnpm overrides ([#26](https://github.com/nodrel-dev/n8n-fedex-node/issues/26)) ([baca923](https://github.com/nodrel-dev/n8n-fedex-node/commit/baca923b514f8c96cd80f784039671fbe7384df6))
+
 ## [0.2.5](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.4...0.2.5) (2026-06-20)
 
 
