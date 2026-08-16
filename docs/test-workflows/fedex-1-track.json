@@ -1,0 +1,56 @@
+{
+  "name": "FedEx 1 \u2014 Track shipment",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1111111-1111-1111-1111-111111111111",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "tracking",
+        "operation": "track",
+        "authentication": "fedexTrackOAuth2Api",
+        "trackingMultiple": false,
+        "trackingNumber": "123456789012",
+        "includeDetailedScans": true
+      },
+      "id": "b2222222-2222-2222-2222-222222222222",
+      "name": "FedEx",
+      "type": "@nodrel-dev/n8n-nodes-fedex.fedex",
+      "typeVersion": 1,
+      "position": [
+        560,
+        300
+      ],
+      "credentials": {
+        "fedexTrackOAuth2Api": {
+          "id": "6IrLd5Bn7ZuVCVTq",
+          "name": "FedEx Track \u2014 Sandbox (harness)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "FedEx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
