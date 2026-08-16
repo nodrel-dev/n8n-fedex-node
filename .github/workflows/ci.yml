@@ -6,6 +6,12 @@ on:
     branches:
       - main
 
+# Least-privilege default for GITHUB_TOKEN. This job only reads the repo to
+# lint and build; it never writes back. Flagged by CodeQL as
+# actions/missing-workflow-permissions.
+permissions:
+  contents: read
+
 # Cancel in-progress runs for the same branch/PR to avoid wasting CI minutes.
 concurrency:
   group: ci-${{ github.ref }}
