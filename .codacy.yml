@@ -18,4 +18,7 @@ exclude_paths:
   - 'docs/**'
   - '.agents/**'
   - 'internal/**'
-  - '**/*.md'
+  # Java glob syntax: '**.md' matches every .md in the repo INCLUDING the root.
+  # '**/*.md' would only match markdown nested in a directory, leaving
+  # AGENTS.md / CODE_OF_CONDUCT.md / SECURITY.md still reported by remark-lint.
+  - '**.md'
