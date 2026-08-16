@@ -1,27 +1,66 @@
-# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
-#
-# You can adjust the behavior by modifying this file.
-# For more information, see:
-# https://github.com/actions/stale
+# Warns and then closes issues and PRs that have gone quiet.
+# See: https://github.com/actions/stale
+
 name: Mark stale issues and pull requests
 
 on:
   schedule:
-  - cron: '22 10 * * *'
+    - cron: '22 10 * * *'
+  # Allows a manual run for testing, and a dry run via debug-only.
+  workflow_dispatch:
+    inputs:
+      debug-only:
+        description: 'Dry run — log what would be marked without changing anything'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 jobs:
   stale:
-
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
 
     steps:
-    - uses: actions/stale@v5
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Stale issue message'
-        stale-pr-message: 'Stale pull request message'
-        stale-issue-label: 'no-issue-activity'
-        stale-pr-label: 'no-pr-activity'
+      - uses: actions/stale@v11
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Manual runs default to a dry run; the nightly schedule acts for real.
+          debug-only: ${{ github.event_name == 'workflow_dispatch' && inputs.debug-only }}
+
+          days-before-stale: 60
+          days-before-close: 14
+
+          stale-issue-label: 'no-issue-activity'
+          stale-pr-label: 'no-pr-activity'
+
+          stale-issue-message: >
+            This issue has had no activity for 60 days, so it is being marked stale.
+            If it is still relevant, leave a comment and it will stay open —
+            otherwise it will close in 14 days. Thanks for helping with n8n-nodes-fedex.
+
+          stale-pr-message: >
+            This pull request has had no activity for 60 days, so it is being marked
+            stale. If you are still working on it, leave a comment or push a commit and
+            it will stay open — otherwise it will close in 14 days. Thanks for
+            contributing to n8n-nodes-fedex.
+
+          close-issue-message: >
+            Closing this issue after 14 days with no further activity. Comment to
+            reopen if it is still relevant — closed does not mean rejected.
+
+          close-pr-message: >
+            Closing this pull request after 14 days with no further activity.
+            Comment to reopen if you would like to pick it back up.
+
+          # Never auto-close tracked work or automated release state. The
+          # 'autorelease: *' labels matter most: release-please keeps a standing
+          # release PR open indefinitely, and closing it would break the publish
+          # pipeline described in CLAUDE.md.
+          exempt-issue-labels: 'security,pinned,help wanted,good first issue'
+          exempt-pr-labels: 'security,pinned,dependencies,autorelease: pending,autorelease: tagged'
+          exempt-all-milestones: true
