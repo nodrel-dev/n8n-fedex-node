@@ -61,6 +61,6 @@ jobs:
           # 'autorelease: *' labels matter most: release-please keeps a standing
           # release PR open indefinitely, and closing it would break the publish
           # pipeline described in CLAUDE.md.
-          exempt-issue-labels: 'security,pinned,help wanted,good first issue'
+          exempt-issue-labels: 'security,pinned,help wanted,good first issue,dependencies'
           exempt-pr-labels: 'security,pinned,dependencies,autorelease: pending,autorelease: tagged'
           exempt-all-milestones: true
