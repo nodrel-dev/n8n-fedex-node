@@ -1,0 +1,48 @@
+# Path-based PR labels applied by .github/workflows/label.yml (actions/labeler).
+#
+# Syntax is the v5+ `changed-files` form — the pre-v5 `label: [glob]` shorthand
+# is NOT compatible with the action version pinned in the workflow.
+#
+# Note: labeler reads THIS FILE FROM THE BASE BRANCH (main), because the
+# workflow runs on `pull_request_target`. Edits here only take effect for PRs
+# opened after they land on main.
+
+node:
+  - changed-files:
+      - any-glob-to-any-file: 'nodes/**'
+
+credentials:
+  - changed-files:
+      - any-glob-to-any-file: 'credentials/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.test.mts'
+          - 'vitest.config.mts'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '**/*.md'
+          - 'documentation.yaml'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'pnpm-lock.yaml'
+          - 'pnpm-workspace.yaml'
+
+tooling:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tsconfig.json'
+          - 'eslint.config.mjs'
+          - '.prettierrc.js'
+          - 'scripts/**'

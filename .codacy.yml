@@ -1,0 +1,21 @@
+---
+# Scope the Codacy Security Scan (.github/workflows/codacy.yml) to shippable
+# source only — nodes/ and credentials/.
+#
+# Without this, Codacy's Python tools (pylint, pylintpython3, bandit, prospector)
+# reported 53 of 63 alerts against scripts/fedex-harness-seed.py, a LOCAL sandbox
+# test harness that is never published (package.json ships only `dist`). That
+# buried the Security tab in findings for code that does not ship.
+#
+# TypeScript quality is gated by `pnpm lint` (n8n strict) in CI, not by Codacy:
+# Codacy's bundled ESLint cannot read this repo's flat config (eslint.config.mjs)
+# and fails every run with "No ESLint configuration found in /src".
+#
+# Codacy reads this file from the DEFAULT BRANCH; a PR's version is considered
+# but the main-branch copy takes precedence.
+exclude_paths:
+  - 'scripts/**'
+  - 'docs/**'
+  - '.agents/**'
+  - 'internal/**'
+  - '**/*.md'
