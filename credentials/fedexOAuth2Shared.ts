@@ -87,3 +87,5 @@ export function fedexCredentialNotice(project: string, otherCredential: string):
 		default: '',
 	};
 }
+
+// labeler smoke test - remove with this PR

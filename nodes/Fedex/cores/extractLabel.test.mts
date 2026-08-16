@@ -76,3 +76,5 @@ describe('extractLabel', () => {
 		expect(() => extractLabel(big, 'PDF')).toThrow(/unexpectedly large label/i);
 	});
 });
+
+// labeler smoke test - remove with this PR
