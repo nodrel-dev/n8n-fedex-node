@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.6...0.2.7) (2026-08-17)
+
+
+### Bug Fixes
+
+* correct README resource names and repair dead documentation links ([#38](https://github.com/nodrel-dev/n8n-fedex-node/issues/38)) ([e80e024](https://github.com/nodrel-dev/n8n-fedex-node/commit/e80e024e53980fb25bf606dbd808f269f8f7116c))
+
 ## [0.2.6](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.5...0.2.6) (2026-06-24)
 
 
