@@ -7,7 +7,7 @@
 
 ## Business purpose
 
-`n8n-nodes-fedex` is an [n8n](https://n8n.io/) community node that calls the **FedEx REST API
+`@nodrel-dev/n8n-nodes-fedex` is an [n8n](https://n8n.io/) community node that calls the **FedEx REST API
 directly** — no shipping aggregator in between. A business uses its **own** FedEx API credentials
 and account number, so workflows quote the account's **negotiated rates**, and FedEx bills that
 account directly. The node packages four FedEx capabilities as n8n operations: track a shipment,

@@ -36,7 +36,7 @@ When asked to build or update a node in this project, follow these steps:
    - Build the project to ensure it actually builds
    - Run the linter to make sure that there aren't any warnings or
      errors
-   - Ensure UX follows the [n8n UX guidelines](https://docs.n8n.io/integrations/creating-nodes/build/reference/ux-guidelines/)
+   - Ensure UX follows the [n8n UX guidelines](https://docs.n8n.io/connect/create-nodes/build-your-node/reference/ux-guidelines)
    - Ensure the credentials are secure (sensitive values **are marked as
      `password`**, **no secrets logged** and **there aren't any
      hardcoded secrets**)
