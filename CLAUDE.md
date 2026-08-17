@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A publishable **n8n community node** (`n8n-nodes-fedex`) that talks **directly** to the FedEx
+A publishable **n8n community node** (`@nodrel-dev/n8n-nodes-fedex`) that talks **directly** to the FedEx
 REST API — no aggregator middleman. The value prop: businesses with their own negotiated FedEx
 accounts hit the carrier API with their own rates. npm has no direct FedEx node today.
 
-**Status:** shipped — npm `0.2.0` is the current release (declarative/custom template,
-`@n8n/node-cli` 0.34.0). All **four real operations are implemented** across two resources
+**Status:** shipped and published to npm as **`@nodrel-dev/n8n-nodes-fedex`** (declarative/custom
+template, `@n8n/node-cli` 0.34.0). For the current version, read `package.json` /
+`gh release list` — don't trust a number written here. All **four real operations are implemented** across two resources
 (Tracking: Track; Shipping: Get Rates, Create, Validate) with their two credentials; the
 placeholder `User`/`Company` scaffold resources are gone. `pnpm build` + `pnpm lint` + `pnpm test`
 are green. Remaining work is operation-level sandbox verification and hardening, not initial build.
@@ -42,7 +43,9 @@ installed globally via pnpm). **Always run via pnpm — npm installs fail** (n8n
 `only-allow` postinstall).
 
 ```bash
-# One-time scaffold (declarative/custom template = best fit for a REST API):
+# One-time scaffold (declarative/custom template = best fit for a REST API).
+# Historical record: this created the bare name, later renamed to the scoped
+# @nodrel-dev/n8n-nodes-fedex. Do not re-run.
 n8n-node new n8n-nodes-fedex --template declarative/custom
 
 # Inside the repo:
@@ -159,8 +162,11 @@ captured FedEx specs they reference live in the private `internal/fedex-docs/`.
   drift. `documentation.yaml` flags which entries need re-verification (`verify: true`).
 - Surface the real FedEx error (`errors[].message`) via `NodeApiError` / `NodeOperationError`;
   honor n8n's **Continue On Fail**.
-- Package must be named `n8n-nodes-fedex`, include the `n8n-community-node-package` keyword, and
-  declare the `n8n` config block pointing at built nodes + credentials.
+- **Package name is `@nodrel-dev/n8n-nodes-fedex`** — the published, scoped name. n8n requires the
+  name to start with `n8n-nodes-` **or** `@<scope>/n8n-nodes-`, so the scope is compliant; do not
+  "fix" it back to the bare `n8n-nodes-fedex` (that was the scaffold's name, renamed in `c20e1c0`).
+  Also include the `n8n-community-node-package` keyword and declare the `n8n` config block pointing
+  at built nodes + credentials.
 
 ## Reference shortcuts
 

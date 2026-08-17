@@ -23,7 +23,7 @@
 #   - All four v1 endpoint paths match the specs exactly.
 
 meta:
-  package_name: n8n-nodes-fedex
+  package_name: "@nodrel-dev/n8n-nodes-fedex"   # scoped; n8n allows n8n-nodes-* or @scope/n8n-nodes-*
   community_keyword: n8n-community-node-package
   node_cli_binary: n8n-node          # from @n8n/node-cli, installed globally via pnpm
   package_manager: pnpm              # ENFORCED - npm installs fail (only-allow postinstall)
@@ -137,30 +137,38 @@ fedex:
 # n8n node development
 # ---------------------------------------------------------------------------
 n8n:
+  # Link paths re-verified 2026-08-17. n8n restructured its docs: the old
+  # /integrations/creating-nodes/** tree is now /connect/create-nodes/**. The old URLs
+  # SOFT-404 (HTTP 200 with a not-found body), so a curl status check will not catch the
+  # rot — check the page body, or cross-check https://docs.n8n.io/sitemap.md.
   guides:
     - name: Community nodes hub
       url: https://docs.n8n.io/integrations/community-nodes/
     - name: Build a declarative-style node (tutorial)
-      url: https://docs.n8n.io/integrations/creating-nodes/build/declarative-style-node/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/tutorial-build-a-declarative-style-node
       purpose: Primary pattern for Track / Rate / Validate
     - name: Build a programmatic-style node
-      url: https://docs.n8n.io/integrations/creating-nodes/build/programmatic-style-node/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/tutorial-build-a-programmatic-style-node
       purpose: Pattern for Create shipment (base64 label -> binary in execute())
 
   reference:
     - name: Node base files / structure
-      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/node-base-files/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/reference/base-files/structure
     - name: Credentials file reference
-      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/credentials-files/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/reference/credentials-files
       purpose: ICredentialType, authenticate, preAuthentication, credentialTest
     - name: HTTP request helpers / routing
-      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/http-request-helpers/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/reference/http-request-helpers
     - name: Code standards (incl. binary data handling)
-      url: https://docs.n8n.io/integrations/creating-nodes/build/reference/code-standards/
+      url: https://docs.n8n.io/connect/create-nodes/build-your-node/reference/code-standards
 
   publishing:
     - name: Submit community nodes (registry + verification)
-      url: https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/
+      url: https://docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes
+      purpose: >
+        Authoritative naming rule - package name must start with n8n-nodes- OR
+        @<scope>/n8n-nodes- (this package uses the scoped form), plus the
+        n8n-community-node-package keyword and the n8n attribute in package.json.
     - name: "@n8n/node-cli (npm)"
       url: https://www.npmjs.com/package/@n8n/node-cli
       note: npmjs blocks automated fetch (403); browse manually if needed.

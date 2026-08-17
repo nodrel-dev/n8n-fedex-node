@@ -20,7 +20,7 @@ Track shipments · validate addresses · quote rates · create labels — agains
 
 This is an [n8n](https://n8n.io/) community node for the **FedEx REST API**. It lets your workflows track shipments, validate addresses, quote rates, and create shipping labels — talking straight to FedEx with your own API credentials.
 
-Because there's no aggregator in the middle, you get **your own negotiated rates** and FedEx bills your account directly. [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
+Because there's no aggregator in the middle, you get **your own negotiated rates** and FedEx bills your account directly. [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/privacy-and-security/sustainable-use-license) workflow automation platform.
 
 ### Highlights
 
@@ -56,33 +56,34 @@ flowchart LR
 
 ## Installation
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation. In n8n, go to **Settings → Community Nodes → Install** and enter `@nodrel-dev/n8n-nodes-fedex`.
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation) in the n8n community nodes documentation. In n8n, go to **Settings → Community Nodes → Install** and enter `@nodrel-dev/n8n-nodes-fedex`.
 
 ## Operations
 
-The node exposes two resources: **Shipment** and **Address**.
+The node exposes two resources: **Tracking** and **Shipping**. They mirror the two FedEx Developer
+Portal projects, so each resource uses its own credential (see [Credentials](#credentials)).
 
 ```mermaid
 flowchart TD
     node["FedEx node"]
-    node --> shipment["📦 Shipment"]
-    node --> address["📍 Address"]
+    node --> tracking["📦 Tracking<br/><i>FedEx Track OAuth2 API</i>"]
+    node --> shipping["🚚 Shipping<br/><i>FedEx Shipping OAuth2 API</i>"]
 
-    shipment --> track["Track<br/>POST /track/v1/trackingnumbers"]
-    shipment --> rates["Get Rates<br/>POST /rate/v1/rates/quotes"]
-    shipment --> create["Create<br/>POST /ship/v1/shipments"]
-    address --> validate["Validate<br/>POST /address/v1/addresses/resolve"]
+    tracking --> track["Track<br/>POST /track/v1/trackingnumbers"]
+    shipping --> rates["Get Rates<br/>POST /rate/v1/rates/quotes"]
+    shipping --> create["Create<br/>POST /ship/v1/shipments"]
+    shipping --> validate["Validate<br/>POST /address/v1/addresses/resolve"]
 ```
 
-### Shipment
+### Tracking
 
 - **Track** — Get the status and scan history for one or more tracking numbers (`POST /track/v1/trackingnumbers`). Toggle **Track Multiple Numbers** to pass a comma-separated list, and **Include Detailed Scans** for the full scan event history.
+
+### Shipping
+
 - **Get Rates** — Quote negotiated and list rates for available services (`POST /rate/v1/rates/quotes`). Leave **Service Type** as _All Available Services_ to compare every eligible service, or pin a single one. Requires a **Shipping Account Number**. The panel shows a short required core (addresses, weight); optional inputs live under **Additional Fields**.
 - **Create** — Buy a shipment and get a printable label plus tracking number (`POST /ship/v1/shipments`). The label is returned as **n8n binary data** (see [Usage](#usage)). Requires a **Shipping Account Number**. **Service Type** defaults to **FedEx Ground**; optional inputs (company, email, packaging, label stock, dimensions, …) live under **Additional Fields**.
-
-### Address
-
-- **Validate** — Standardize an address and classify it residential vs commercial (`POST /address/v1/addresses/resolve`).
+- **Validate** — Standardize an address and classify it residential vs commercial (`POST /address/v1/addresses/resolve`). Grouped under **Shipping** because FedEx bundles Address Validation into the same portal project (and therefore the same API key) as Rate and Ship.
 
 ## Credentials
 
@@ -185,7 +186,7 @@ Deeper docs for contributors and integrators live in [`docs/`](docs/):
 
 ## Resources
 
-- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes)
 - [FedEx Developer Portal](https://developer.fedex.com/)
 - [FedEx API documentation](https://developer.fedex.com/api/en-us/catalog.html)
 

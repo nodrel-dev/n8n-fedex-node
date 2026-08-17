@@ -16,7 +16,7 @@
    gating on `operation` works for normal runs but breaks AI-Agent **tool** execution. (§1)
 2. **FedEx `client_credentials` rejects an explicit `scope`** — must be empty string, not `CXS`. (§2)
 3. **FedEx sandbox keys are per-project** — the Track key 403s on Ship/Rate/Validate and vice-versa. (§3)
-4. **Under `n8n-node dev` the node type is `CUSTOM.fedex`**, not `n8n-nodes-fedex.fedex`. (§4)
+4. **Under `n8n-node dev` the node type is `CUSTOM.fedex`**, not `@nodrel-dev/n8n-nodes-fedex.fedex`. (§4)
 5. **Release publish must be `n8n-node release`, never raw `npm publish`** — a `prepublishOnly`
    guard `exit(1)`s otherwise. (§7)
 
@@ -98,17 +98,19 @@ credential classes (ADR-0004):
 
 ---
 
-## 4. Dev node type is `CUSTOM.fedex`, not `n8n-nodes-fedex.fedex`
+## 4. Dev node type is `CUSTOM.fedex`, not `@nodrel-dev/n8n-nodes-fedex.fedex`
 
 Under `n8n-node dev`, the CLI symlinks the package into n8n's custom-extensions dir
-(`~/.n8n-node-cli/.n8n/custom/node_modules/n8n-nodes-fedex`). n8n loads it via `CustomDirectoryLoader`,
-which sets `packageName = 'CUSTOM'`. Node type = `packageName.nodeName`, so the **live dev type is
-`CUSTOM.fedex`** (the credential type stays `fedexOAuth2Api`, unprefixed).
+(`~/.n8n-node-cli/.n8n/custom/node_modules/@nodrel-dev/n8n-nodes-fedex` — scoped packages nest under
+the scope dir). n8n loads it via `CustomDirectoryLoader`, which sets `packageName = 'CUSTOM'`. Node
+type = `packageName.nodeName`, so the **live dev type is `CUSTOM.fedex`** (credential types are never
+prefixed — they stay `fedexTrackOAuth2Api` / `fedexShippingOAuth2Api`).
 
 **Consequence:** a workflow created via the n8n public API for dev testing must use `"type":
-"CUSTOM.fedex"`. Using the published-package type `n8n-nodes-fedex.fedex` makes nodes render as "?"
-with "Install the package to use this node." Once published to npm and installed normally, the real
-type is `n8n-nodes-fedex.fedex`.
+"CUSTOM.fedex"`. Using the published-package type makes nodes render as "?" with "Install the package
+to use this node." Once published to npm and installed normally, the real type is the **scoped**
+`@nodrel-dev/n8n-nodes-fedex.fedex` — which is what `nodes/Fedex/Fedex.node.json` and the committed
+`docs/test-workflows/*.json` use.
 
 ---
 
