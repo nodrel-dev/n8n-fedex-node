@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.8](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.7...0.2.8) (2026-09-05)
+
+
+### Bug Fixes
+
+* override nanoid to &gt;=3.3.18 to clear three high advisories ([#40](https://github.com/nodrel-dev/n8n-fedex-node/issues/40)) ([d0d4aa3](https://github.com/nodrel-dev/n8n-fedex-node/commit/d0d4aa3b7e31a8fb5b72d41dd535410ee7711bcb))
+
 ## [0.2.7](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.6...0.2.7) (2026-08-17)
 
 
