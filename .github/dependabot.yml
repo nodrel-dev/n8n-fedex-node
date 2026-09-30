@@ -1,0 +1,37 @@
+# Dependabot SECURITY updates are already enabled for this repo (they open PRs on
+# their own). What was missing is scheduled VERSION updates, which is why several
+# pnpm.overrides floors silently went stale for weeks: an upstream would ship an
+# incremental follow-up fix, the floor would keep resolving to the older
+# vulnerable version, and nothing refreshed the lockfile until someone looked.
+#
+# Scope note: this keeps DIRECT devDependencies current and refreshes the
+# lockfile. It does NOT fully automate the override-floor problem — transitive
+# versions pinned by pnpm.overrides still need their floors raised by hand, with
+# Dependabot alerts plus `pnpm audit` as the signal. It shrinks the manual
+# surface; it does not remove it.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      # Conventional Commits: release-please reads these. Use chore(deps) so
+      # routine dependency bumps do not cut a release on their own.
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        patterns:
+          - "*"
+    ignore:
+      # Both are declared "*" in package.json, so letting Dependabot float them
+      # jumps the entire toolchain — measured at @n8n/node-cli 0.34.0 -> 0.50.3
+      # and ~1982 lockfile lines in testing. CLAUDE.md pins workflow behaviour to
+      # the current CLI. Bump these deliberately, never automatically.
+      - dependency-name: "@n8n/node-cli"
+      - dependency-name: "n8n-workflow"
