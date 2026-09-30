@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.9](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.8...0.2.9) (2026-09-30)
+
+
+### Bug Fixes
+
+* bump vitest to ^4.1.11 to clear GHSA-82fw-gwwq-j7x9 ([#45](https://github.com/nodrel-dev/n8n-fedex-node/issues/45)) ([375d736](https://github.com/nodrel-dev/n8n-fedex-node/commit/375d736c229da79b38d879d8a866b351f7c5c76a))
+* raise eight stale pnpm override floors to clear 27 advisories ([#43](https://github.com/nodrel-dev/n8n-fedex-node/issues/43)) ([7b54b0d](https://github.com/nodrel-dev/n8n-fedex-node/commit/7b54b0d8023e94ef5420d9858fa16f1193cfd08d))
+
 ## [0.2.8](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.7...0.2.8) (2026-09-05)
 
 
