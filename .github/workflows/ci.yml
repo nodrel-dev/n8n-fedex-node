@@ -33,7 +33,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
+          # Pinned: lts/* became Node 26, where isolated-vm 6.x (via n8n-workflow ->
+          # @n8n/expression-runtime) fails to compile. Move with the n8n toolchain.
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install dependencies
