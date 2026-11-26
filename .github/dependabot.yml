@@ -35,3 +35,11 @@ updates:
       # the current CLI. Bump these deliberately, never automatically.
       - dependency-name: "@n8n/node-cli"
       - dependency-name: "n8n-workflow"
+      # @n8n/node-cli 0.34.0 peers on eslint 9 (its config requires @eslint/js,
+      # which eslint 10 no longer bundles) and its default tsconfig uses
+      # moduleResolution=node10, which TypeScript 7 removed. #47 took both majors
+      # and broke build + lint. Majors here move only with the CLI.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]

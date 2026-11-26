@@ -216,6 +216,29 @@ The chat webhook is unreliable headless. The verification harness that actually 
 
 ---
 
+## 11. Dependabot PRs can silently undo `pnpm.overrides` and break the toolchain
+
+**Symptom:** ~40 Dependabot alerts that had been fixed reappear at once; `pnpm install
+--frozen-lockfile` fails with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`; `pnpm build` fails with
+`TS5108: Option 'moduleResolution=node10' has been removed`; `pnpm lint` fails with
+`Cannot find module '@eslint/js'`.
+
+**Root cause:** the grouped dev-dependency PR #47 regenerated `pnpm-lock.yaml` **without its
+`overrides:` block**, so every security floor stopped applying and transitives fell back to
+vulnerable versions. The same PR took TypeScript 5→7 and ESLint 9→10, both incompatible with
+`@n8n/node-cli` 0.34.0 (it peers on eslint 9 and its default tsconfig uses node10 resolution).
+It was merged with its `build` check **cancelled**, so nothing caught it.
+
+**Lessons:**
+- Never merge a Dependabot PR whose `build` check didn't run to success. Cancelled is not passing.
+- After any lockfile-touching PR, check that `grep -n '^overrides:' pnpm-lock.yaml` still matches
+  `pnpm.overrides`.
+- eslint / typescript **majors** move only with the CLI — `dependabot.yml` now ignores them.
+- `vite` is a **peer** of vitest 5, so a `pnpm.overrides` entry does not move it; it's declared as a
+  direct devDependency instead.
+
+---
+
 ## Where the deeper context lives
 
 - **Spec & acceptance criteria** → `internal/fedex-node-build-brief.md`
