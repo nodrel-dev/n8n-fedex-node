@@ -1,6 +1,6 @@
 {
   "name": "@nodrel-dev/n8n-nodes-fedex",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "publishConfig": {
     "access": "public"
   },
