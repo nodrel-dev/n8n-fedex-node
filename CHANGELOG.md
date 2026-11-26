@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.10](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.9...0.2.10) (2026-11-26)
+
+
+### Bug Fixes
+
+* restore pnpm overrides dropped by [#47](https://github.com/nodrel-dev/n8n-fedex-node/issues/47) and clear open advisories ([#57](https://github.com/nodrel-dev/n8n-fedex-node/issues/57)) ([d3c73ac](https://github.com/nodrel-dev/n8n-fedex-node/commit/d3c73ac268cfaa43afae918abb4106c337342697))
+
 ## [0.2.9](https://github.com/nodrel-dev/n8n-fedex-node/compare/0.2.8...0.2.9) (2026-09-30)
 
 
